@@ -1,0 +1,31 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.13.35931.197 d17.13
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Burn_Out", "Burn_Out\Burn_Out.csproj", "{B5FB2701-8A6D-425B-9B27-989021E1252E}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Burn_Out.Client", "Burn_Out.Client\Burn_Out.Client.csproj", "{F206358F-23A2-4947-B335-3ED3238B4582}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{B5FB2701-8A6D-425B-9B27-989021E1252E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B5FB2701-8A6D-425B-9B27-989021E1252E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B5FB2701-8A6D-425B-9B27-989021E1252E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B5FB2701-8A6D-425B-9B27-989021E1252E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F206358F-23A2-4947-B335-3ED3238B4582}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F206358F-23A2-4947-B335-3ED3238B4582}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F206358F-23A2-4947-B335-3ED3238B4582}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F206358F-23A2-4947-B335-3ED3238B4582}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {AF8DE184-7491-4284-ABDF-B4F3679AFB02}
+	EndGlobalSection
+EndGlobal
