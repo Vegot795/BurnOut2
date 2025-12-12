@@ -1,0 +1,236 @@
+@page "/Account/Edit"
+@using System.ComponentModel.DataAnnotations
+@using Burn_Out.Components.Account
+@using Microsoft.AspNetCore.Identity
+@using Microsoft.AspNetCore.Authorization
+@using Infrastructure
+
+@attribute [Authorize]
+
+@inject UserManager<ApplicationUser> UserManager
+@inject IdentityUserAccessor UserAccessor
+@inject NavigationManager NavigationManager
+@inject ISnackbar Snackbar
+
+<MudPopoverProvider />
+
+<PageTitle>Edit Account</PageTitle>
+
+<MudContainer MaxWidth="MaxWidth.Large" Class="mt-4">
+    <MudPaper Class="pa-4">
+        <MudText Typo="Typo.h4" GutterBottom="true">Edit Account Information</MudText>
+
+        @if (isLoading)
+        {
+            <MudProgressCircular Color="Color.Primary" Indeterminate="true" />
+        }
+        else if (user == null || Input == null)
+        {
+            <MudAlert Severity="Severity.Error">Unable to load user data.</MudAlert>
+        }
+        else
+        {
+            <EditForm Model="Input" OnValidSubmit="OnValidSubmitAsync" FormName="accountEdit">
+                <DataAnnotationsValidator />
+                <ValidationSummary class="text-danger" />
+                
+                <MudGrid>
+                    <MudItem xs="12">
+                        <MudText Typo="Typo.h6" GutterBottom="true">Personal Information</MudText>
+                    </MudItem>
+
+                    <MudItem xs="12" sm="6">
+                        <MudStack Spacing="1">
+                            <MudText Typo="Typo.body2">First Name</MudText>
+                            <InputText @bind-Value="Input.FirstName" 
+                                      class="form-control" 
+                                      placeholder="Enter your first name" />
+                            <ValidationMessage For="@(() => Input.FirstName)" />
+                        </MudStack>
+                    </MudItem>
+
+                    <MudItem xs="12" sm="6">
+                        <MudStack Spacing="1">
+                            <MudText Typo="Typo.body2">Last Name</MudText>
+                            <InputText @bind-Value="Input.LastName" 
+                                      class="form-control" 
+                                      placeholder="Enter your last name" />
+                            <ValidationMessage For="@(() => Input.LastName)" />
+                        </MudStack>
+                    </MudItem>
+
+                    <MudItem xs="12" sm="6">
+                        <MudStack Spacing="1">
+                            <MudText Typo="Typo.body2">Date of Birth</MudText>
+                            <InputDate @bind-Value="Input.DateOfBirth" 
+                                      class="form-control" 
+                                      max="@DateTime.Today.ToString("yyyy-MM-dd")" />
+                            <ValidationMessage For="@(() => Input.DateOfBirth)" />
+                        </MudStack>
+                    </MudItem>
+
+                    <MudItem xs="12" sm="6">
+                        <MudStack Spacing="1">
+                            <MudText Typo="Typo.body2">Phone Number</MudText>
+                            <InputText @bind-Value="Input.PhoneNumber" 
+                                      class="form-control" 
+                                      type="tel"
+                                      placeholder="Enter your phone number" />
+                            <ValidationMessage For="@(() => Input.PhoneNumber)" />
+                        </MudStack>
+                    </MudItem>
+
+                    <MudItem xs="12">
+                        <MudDivider Class="my-4" />
+                    </MudItem>
+
+                    <MudItem xs="12">
+                        <MudStack Row="true" Spacing="3">
+                            <MudButton ButtonType="ButtonType.Submit" 
+                                       Variant="Variant.Filled" 
+                                       Color="Color.Primary"
+                                       StartIcon="@Icons.Material.Filled.Save"
+                                       Disabled="isSaving">
+                                @if (isSaving)
+                                {
+                                    <MudProgressCircular Size="Size.Small" Indeterminate="true" />
+                                    <MudText Class="ml-2">Saving...</MudText>
+                                }
+                                else
+                                {
+                                    <MudText>Save Changes</MudText>
+                                }
+                            </MudButton>
+                            <MudButton Variant="Variant.Outlined" 
+                                       Color="Color.Default"
+                                       Href="/Account/Display"
+                                       Disabled="isSaving">
+                                Cancel
+                            </MudButton>
+                        </MudStack>
+                    </MudItem>
+                </MudGrid>
+            </EditForm>
+        }
+    </MudPaper>
+</MudContainer>
+
+<style>
+    .form-control {
+        width: 100%;
+        padding: 0.75rem;
+        border: 1px solid #d0d0d0;
+        border-radius: 4px;
+        font-size: 1rem;
+        font-family: inherit;
+    }
+
+    .form-control:focus {
+        outline: none;
+        border-color: var(--mud-palette-primary);
+        box-shadow: 0 0 0 2px rgba(var(--mud-palette-primary-rgb), 0.2);
+    }
+</style>
+
+@code {
+private ApplicationUser? user;
+private bool isLoading = true;
+private bool isSaving = false;
+
+[CascadingParameter]
+private HttpContext HttpContext { get; set; } = default!;
+
+[SupplyParameterFromForm]
+private InputModel? Input { get; set; }
+
+protected override async Task OnInitializedAsync()
+{
+    try
+    {
+        user = await UserAccessor.GetRequiredUserAsync(HttpContext);
+        
+        // Initialize Input if null and populate on GET requests
+        if (HttpContext.Request.Method == "GET")
+        {
+            Input = new InputModel
+            {
+                FirstName = user.FirstName,
+                LastName = user.LastName,
+                DateOfBirth = user.DateOfBirth,
+                PhoneNumber = user.PhoneNumber
+            };
+        }
+        else if (Input == null)
+        {
+            // POST but Input is null - initialize with empty model
+            Input = new InputModel();
+        }
+    }
+    catch (Exception)
+    {
+        user = null;
+        Snackbar.Add("Error loading user data", Severity.Error);
+    }
+    finally
+    {
+        isLoading = false;
+    }
+}
+
+    private async Task OnValidSubmitAsync()
+    {
+        if (user == null || Input == null) return;
+
+        isSaving = true;
+        try
+        {
+            // Update user properties
+            user.FirstName = Input.FirstName;
+            user.LastName = Input.LastName;
+            user.DateOfBirth = Input.DateOfBirth;
+            user.PhoneNumber = Input.PhoneNumber;
+            user.LastModifiedAt = DateTime.UtcNow;
+
+            var result = await UserManager.UpdateAsync(user);
+
+            if (result.Succeeded)
+            {
+                Snackbar.Add("Profile updated successfully!", Severity.Success);
+                NavigationManager.NavigateTo("/Account/Display");
+            }
+            else
+            {
+                foreach (var error in result.Errors)
+                {
+                    Snackbar.Add(error.Description, Severity.Error);
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"Error saving changes: {ex.Message}", Severity.Error);
+        }
+        finally
+        {
+            isSaving = false;
+        }
+    }
+
+    private sealed class InputModel
+    {
+        [StringLength(100, ErrorMessage = "Imiê nie mo¿e przekraczaæ 100 znaków")]
+        [Display(Name = "Imiê")]
+        public string? FirstName { get; set; }
+
+        [StringLength(100, ErrorMessage = "Nazwisko nie mo¿e przekraczaæ 100 znaków")]
+        [Display(Name = "Nazwisko")]
+        public string? LastName { get; set; }
+
+        [Display(Name = "Data urodzenia")]
+        public DateTime? DateOfBirth { get; set; }
+
+        [Phone]
+        [Display(Name = "Numer telefonu")]
+        public string? PhoneNumber { get; set; }
+    }
+}

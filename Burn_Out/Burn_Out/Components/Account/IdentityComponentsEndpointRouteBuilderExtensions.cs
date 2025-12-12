@@ -2,7 +2,7 @@ using System.Security.Claims;
 using System.Text.Json;
 using Burn_Out.Components.Account.Pages;
 using Burn_Out.Components.Account.Pages.Manage;
-using Burn_Out.Data;
+using Infrastructure;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Http.Extensions;

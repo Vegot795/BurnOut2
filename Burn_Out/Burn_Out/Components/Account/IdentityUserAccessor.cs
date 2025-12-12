@@ -1,4 +1,4 @@
-using Burn_Out.Data;
+using Infrastructure;
 using Microsoft.AspNetCore.Identity;
 
 namespace Burn_Out.Components.Account

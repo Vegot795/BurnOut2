@@ -1,0 +1,58 @@
+﻿@page "/hall-list"
+
+@using Infrastructure
+@using Core.Models
+@using Microsoft.EntityFrameworkCore
+@using MudBlazor
+@using Infrastructure.Data
+@using Core.Interfaces
+
+@inject IHallRepository HallRepository
+@inject ApplicationDbContext DbContext
+
+<h3>Hall_List</h3>
+
+<MudPaper>
+    <MudGrid>
+        <MudTable Items="@hallList" Hover="true" Loading="@_loading" >
+            <HeaderContent>
+                <MudTh>Nazwa</MudTh>
+                <MudTh>Pojemność</MudTh>
+                <MudTh>Czy Zarezerwowana?</MudTh>
+            </HeaderContent>
+            <RowTemplate>
+                <MudTd DataLabel="Nazwa">@context.HallName</MudTd>
+                <MudTd DataLabel="Pojemność">@context.Capacity</MudTd>
+                <MudTd DataLabel="Dostępność">@context.IsAvailable</MudTd>
+            </RowTemplate>
+        </MudTable>
+        <MudItem>
+            <MudButton Variant="Variant.Filled" Color="Color.Primary" Href="/hall-edit">Dodaj Salę</MudButton>
+        </MudItem>
+    </MudGrid>
+</MudPaper>
+
+@code {
+    private bool _loading = false;
+    List<HallModel> hallList = new List<HallModel>();
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadHallAsync();
+    }
+
+    private async Task LoadHallAsync()
+    {
+        try
+        {
+            _loading = true;
+            hallList = await DbContext.Halls
+                            .OrderBy(h => h.HallName)
+                            .ToListAsync();
+        }
+        catch
+        {
+            
+        }
+    }
+}
