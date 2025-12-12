@@ -2,7 +2,6 @@
 using Microsoft.AspNetCore.Identity;
 using Infrastructure.Models;
 using Microsoft.AspNetCore.Authentication;
-using Microsoft.AspNetCore.Components;
 
 [Route("api/[controller]")]
 [ApiController]
@@ -82,7 +81,6 @@ public class AuthController : ControllerBase
         await _signInManager.SignOutAsync();
         _logger.LogInformation("User logged out.");
         return Ok(new { succeeded = true });
-        NavigationManager.NavigateTo("/", forceLoad: true);
 
     }
 
