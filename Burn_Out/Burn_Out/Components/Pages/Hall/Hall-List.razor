@@ -1,0 +1,36 @@
+﻿@page "/hall-list"
+
+@using Core.Models
+@using MudBlazor
+
+<h3>Hall_List</h3>
+
+<MudPaper>
+    <MudGrid>
+        <MudTable Items="@hallList" Hover="true" Loading="@_loading" >
+            <HeaderContent>
+                <MudTh>Nazwa</MudTh>
+                <MudTh>Pojemność</MudTh>
+                <MudTh>Czy Zarezerwowana?</MudTh>
+            </HeaderContent>
+            <RowTemplate>
+                <MudTd DataLabel="Nazwa">@context.Name</MudTd>
+                <MudTd DataLabel="Pojemność">@context.Capacity</MudTd>
+                <MudTd DataLabel="Dostępność">@context.IsAvailable</MudTd>
+            </RowTemplate>
+        </MudTable>
+        <MudItem>
+            <MudButton Variant="Variant.Filled" Color="Color.Primary" Href="/hall-add">Dodaj Salę</MudButton>
+        </MudItem>
+    </MudGrid>
+</MudPaper>
+
+@code {
+    private bool _loading = false;
+    List<Hall> hallList = new List<Hall>();
+
+    protected override async Task OnInitializedAsync()
+    {
+
+    }
+}
