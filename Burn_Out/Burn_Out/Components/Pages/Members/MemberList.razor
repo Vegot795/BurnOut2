@@ -1,0 +1,47 @@
+﻿@page "/user-list"
+
+@using Core.Interfaces
+@using Infrastructure.Models
+@using Infrastructure.Data
+@using Microsoft.EntityFrameworkCore
+@using MudBlazor
+
+
+@inject IHallRepository HallRepository
+@inject ApplicationDbContext DbContext
+@inject ISnackbar SnackBar
+
+<h3>MemberList</h3>
+
+<MudPaper>
+	<MudGrid>
+		<MudTable Items="@memberList" Hover="true">
+
+		</MudTable>
+	</MudGrid>
+</MudPaper>
+
+@code {
+	private bool _loading = false;
+	List<ApplicationUser> memberList = new List<ApplicationUser>();
+
+	protected override async Task OnInitializedAsync()
+	{
+		await LoadMembersAsync();
+	}
+
+	private async Task LoadMembersAsync()
+	{
+		try
+		{
+			_loading = true;
+			memberList = await DbContext.Users
+							.OrderBy(u => u.UserName)
+							.ToListAsync();
+		}
+		catch (Exception ex)
+		{
+			SnackBar.Add($"Error loading members: {ex.Message}", Severity.Error);
+		}
+	}
+}

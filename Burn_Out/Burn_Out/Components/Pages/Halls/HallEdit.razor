@@ -1,5 +1,8 @@
 ﻿@page "/hall-edit"
 @page "/hall-edit/{id:int}"
+
+@rendermode InteractiveServer
+
 @using System.ComponentModel.DataAnnotations
 @using System.Diagnostics
 @using Burn_Out.Components.Account
@@ -20,7 +23,6 @@
 
 <h3>@(IsEditMode ? "Edytuj Salę" : "Dodaj Salę")</h3>
 
-<MudPopoverProvider />
 
 <MudPaper Class="pa-4">
     @if (isLoading)

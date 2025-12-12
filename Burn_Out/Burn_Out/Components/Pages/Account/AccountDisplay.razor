@@ -159,7 +159,7 @@
     {
         try
         {
-            user = await UserAccessor.GetRequiredUserAsync(HttpContext);
+            user = await UserAccessor.GetRequiredUserAsync();
         }
         catch (Exception)
         {

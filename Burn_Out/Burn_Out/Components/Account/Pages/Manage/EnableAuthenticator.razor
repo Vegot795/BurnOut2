@@ -84,7 +84,7 @@ else
 
     protected override async Task OnInitializedAsync()
     {
-        user = await UserAccessor.GetRequiredUserAsync(HttpContext);
+        user = await UserAccessor.GetRequiredUserAsync();
 
         await LoadSharedKeyAndQrCodeUriAsync(user);
     }

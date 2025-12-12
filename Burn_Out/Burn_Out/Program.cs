@@ -9,6 +9,7 @@ using Infrastructure.Data;
 using Core.Interfaces;
 using Infrastructure.Repositories;
 using Infrastructure.Models;
+using Burn_Out.Components.Layout;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -47,6 +48,9 @@ builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options => options.S
     .AddDefaultTokenProviders();
 
 builder.Services.AddScoped<IHallRepository, HallRepository>();
+
+builder.Services.AddHttpContextAccessor();
+
 
 
 var app = builder.Build();

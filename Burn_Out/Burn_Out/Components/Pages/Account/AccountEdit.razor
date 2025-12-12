@@ -12,8 +12,9 @@
 @inject IdentityUserAccessor UserAccessor
 @inject NavigationManager NavigationManager
 @inject ISnackbar Snackbar
+@inject IHttpContextAccessor HttpContextAccessor
 
-<MudPopoverProvider />
+
 
 <PageTitle>Edit Account</PageTitle>
 
@@ -148,10 +149,10 @@ protected override async Task OnInitializedAsync()
 {
     try
     {
-        user = await UserAccessor.GetRequiredUserAsync(HttpContext);
+        user = await UserAccessor.GetRequiredUserAsync();
         
         // Initialize Input if null and populate on GET requests
-        if (HttpContext.Request.Method == "GET")
+        if (user != null)
         {
             Input = new InputModel
             {
