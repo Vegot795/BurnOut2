@@ -2,8 +2,8 @@
 @using System.ComponentModel.DataAnnotations
 @using Burn_Out.Components.Account
 @using Microsoft.AspNetCore.Identity
-@using Burn_Out.Data
 @using Microsoft.AspNetCore.Authorization
+@using Infrastructure
 
 @attribute [Authorize]
 
@@ -218,19 +218,19 @@ protected override async Task OnInitializedAsync()
 
     private sealed class InputModel
     {
-        [StringLength(100, ErrorMessage = "First name cannot exceed 100 characters")]
-        [Display(Name = "First Name")]
+        [StringLength(100, ErrorMessage = "Imiê nie mo¿e przekraczaæ 100 znaków")]
+        [Display(Name = "Imiê")]
         public string? FirstName { get; set; }
 
-        [StringLength(100, ErrorMessage = "Last name cannot exceed 100 characters")]
-        [Display(Name = "Last Name")]
+        [StringLength(100, ErrorMessage = "Nazwisko nie mo¿e przekraczaæ 100 znaków")]
+        [Display(Name = "Nazwisko")]
         public string? LastName { get; set; }
 
-        [Display(Name = "Date of Birth")]
+        [Display(Name = "Data urodzenia")]
         public DateTime? DateOfBirth { get; set; }
 
         [Phone]
-        [Display(Name = "Phone Number")]
+        [Display(Name = "Numer telefonu")]
         public string? PhoneNumber { get; set; }
     }
 }

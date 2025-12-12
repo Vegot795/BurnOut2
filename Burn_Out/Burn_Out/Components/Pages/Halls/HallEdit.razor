@@ -1,0 +1,228 @@
+﻿@page "/hall-edit"
+@page "/hall-edit/{id:int}"
+@using System.ComponentModel.DataAnnotations
+@using Burn_Out.Components.Account
+@using Microsoft.AspNetCore.Identity
+@using Infrastructure
+@using Infrastructure.Data
+@using Microsoft.AspNetCore.Authorization
+@using Core.Models
+@using System.Diagnostics
+
+@attribute [Authorize]
+
+@inject UserManager<ApplicationUser> UserManager
+@inject IdentityUserAccessor UserAccessor
+@inject NavigationManager NavigationManager
+@inject ISnackbar Snackbar
+@inject ApplicationDbContext DbContext
+
+<h3>@(IsEditMode ? "Edytuj Salę" : "Dodaj Salę")</h3>
+
+<MudPopoverProvider />
+
+<MudPaper Class="pa-4">
+    @if (isLoading)
+    {
+        <MudProgressCircular Color="Color.Primary" Indeterminate="true" />
+        <MudText>Ładowanie...</MudText>
+    }
+    else if (Input == null)
+    {
+        <MudAlert Severity="Severity.Error">Błąd ładowania danych sali.</MudAlert>
+    }
+    else
+    {
+        <EditForm Model="Input" OnValidSubmit="OnValidSubmitAsync" FormName="hallEdit">
+            <DataAnnotationsValidator />
+            <ValidationSummary class="text-danger" />
+
+            <MudGrid Spacing="3">
+                <MudItem xs="12" md="6">
+                    <MudStack Spacing="1">
+                        <MudText Typo="Typo.h6">Nazwa Sali</MudText>
+                        <InputText @bind-value="Input.HallName" 
+                        class="form-control"
+                        placeholder="Wpisz nazwę sali"/>
+                        <ValidationMessage For="@(() => Input.HallName)" />
+                    </MudStack>
+                </MudItem>
+
+                <MudItem xs="12" md="6">
+                    <MudStack Spacing="1">
+                        <MudText Typo="Typo.h6">Pojemność</MudText>
+                        <InputNumber @bind-value="Input.Capacity"
+                        class="form-control"
+                        placeholder="Wpisz pojemność sali" />
+                        <ValidationMessage For="@(() => Input.Capacity)" />
+                    </MudStack>
+                </MudItem>
+
+                <MudItem xs="12">
+                    <MudDivider Class="my-4" />
+                </MudItem>
+
+                <MudItem xs="12">
+                    <MudStack Row="true" Spacing="3">
+                        <MudButton ButtonType="ButtonType.Submit" 
+                        Variant="Variant.Filled" 
+                        Color="Color.Primary"
+                        StartIcon="@Icons.Material.Filled.Save"
+                        Disabled="isSaving">
+                            @if (isSaving)
+                            {
+                                <MudProgressCircular Size="Size.Small" Indeterminate="true" />
+                                <MudText Class="ml-2">Zapisywanie...</MudText>
+                            }
+                            else
+                            {
+                                <MudText>@(IsEditMode ? "Zapisz Zmiany" : "Dodaj Salę")</MudText>
+                            }
+                        </MudButton>
+
+                        <MudButton Variant="Variant.Outlined" 
+                        Color="Color.Default"
+                        Href="/hall-list"
+                        Disabled="isSaving">
+                            Anuluj
+                        </MudButton>
+                    </MudStack>
+                </MudItem>
+            </MudGrid>
+        </EditForm>
+    }
+</MudPaper>
+
+<style>
+    .form-control {
+    width: 100%;
+    padding: 0.75rem;
+    border: 1px solid #d0d0d0;
+    border-radius: 4px;
+    font-size: 1rem;
+    font-family: inherit;
+    }
+
+    .form-control:focus {
+    outline: none;
+    border-color: var(--mud-palette-primary);
+    box-shadow: 0 0 0 2px rgba(var(--mud-palette-primary-rgb), 0.2);
+    }
+</style>
+
+@code {
+    [Parameter] public int? Id { get; set; }
+
+    [SupplyParameterFromForm]
+    private InputModel? Input { get; set; }
+
+    private bool isLoading = true;
+    private bool isSaving = false;
+    private bool IsEditMode => Id.HasValue && Id > 0;
+    private HallModel? existingHall;
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            if (IsEditMode)
+            {
+                // Load existing hall for editing
+                existingHall = await DbContext.Halls.FindAsync(Id.Value);
+                if (existingHall == null)
+                {
+                    Snackbar.Add("Nie znaleziono sali o podanym ID.", Severity.Error);
+                    NavigationManager.NavigateTo("/hall-list");
+                    return;
+                }
+
+                // Initialize Input for GET requests when editing
+                if (Input == null)
+                {
+                    Input = new InputModel
+                    {
+                        HallName = existingHall.HallName,
+                        Capacity = existingHall.Capacity
+                    };
+                }
+            }
+            else
+            {
+                // Initialize empty Input for new hall
+                Input ??= new InputModel();
+            }
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"Błąd podczas ładowania danych: {ex.Message}", Severity.Error);
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+
+    private async Task OnValidSubmitAsync()
+    {
+        if (Input == null) return;
+
+        isSaving = true;
+        try
+        {
+            if (IsEditMode && existingHall != null)
+            {
+                // Update existing hall
+                existingHall.HallName = Input.HallName!;
+                existingHall.Capacity = Input.Capacity;
+
+                DbContext.Halls.Update(existingHall);
+                await DbContext.SaveChangesAsync();
+
+                Snackbar.Add("Sala została zaktualizowana pomyślnie!", Severity.Success);
+            }
+            else
+            {
+                // Create new hall
+                var newHall = new HallModel
+                {
+                    HallName = Input.HallName!,
+                    Capacity = Input.Capacity,
+                    IsAvailable = true, // New halls are available by default
+                    ReservationBegin = null,
+                    ReservationEnd = null,
+                    ReservedBy = null
+                };
+
+                DbContext.Halls.Add(newHall);
+                await DbContext.SaveChangesAsync();
+                await InvokeAsync(() => NavigationManager.NavigateTo("/hall-list"));
+
+                Snackbar.Add("Sala została dodana pomyślnie!", Severity.Success);
+            }
+
+
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"Błąd podczas zapisywania: {ex.Message}", Severity.Error);
+            Debug.WriteLine($"Błąd podczas zapisywania: {ex.Message}");
+        }
+        finally
+        {
+            isSaving = false;
+        }
+    }
+
+    private sealed class InputModel
+    {
+        [Required(ErrorMessage = "Nazwa sali jest wymagana.")]
+        [StringLength(30, ErrorMessage = "Nazwa sali nie może przekraczać 30 znaków.")]
+        [Display(Name = "Nazwa Sali")]
+        public string? HallName { get; set; }
+
+        [Required(ErrorMessage = "Pojemność jest wymagana.")]
+        [Range(1, 10000, ErrorMessage = "Pojemność musi być między 1 a 10000.")]
+        [Display(Name = "Pojemność")]
+        public int Capacity { get; set; }
+    }
+}

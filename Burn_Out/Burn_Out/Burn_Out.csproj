@@ -10,7 +10,6 @@
   <ItemGroup>
     <PackageReference Include="Microsoft.Extensions.Identity.Core" Version="10.0.1" />
     <PackageReference Include="MudBlazor" Version="8.15.0" />
-    <ProjectReference Include="..\Application\Application.csproj" />
     <ProjectReference Include="..\Burn_Out.Client\Burn_Out.Client.csproj" />
     <ProjectReference Include="..\Core\Core.csproj" />
     <ProjectReference Include="..\Infrastructure\Infrastructure.csproj" />

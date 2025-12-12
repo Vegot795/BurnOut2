@@ -1,7 +1,7 @@
 using System.Diagnostics;
 using System.Security.Claims;
 using Burn_Out.Client;
-using Burn_Out.Data;
+using Infrastructure;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Components.Server;
