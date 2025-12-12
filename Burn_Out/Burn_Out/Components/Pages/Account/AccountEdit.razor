@@ -1,9 +1,10 @@
 @page "/Account/Edit"
 @using System.ComponentModel.DataAnnotations
 @using Burn_Out.Components.Account
-@using Microsoft.AspNetCore.Identity
-@using Microsoft.AspNetCore.Authorization
 @using Infrastructure
+@using Infrastructure.Models
+@using Microsoft.AspNetCore.Authorization
+@using Microsoft.AspNetCore.Identity
 
 @attribute [Authorize]
 
@@ -11,8 +12,9 @@
 @inject IdentityUserAccessor UserAccessor
 @inject NavigationManager NavigationManager
 @inject ISnackbar Snackbar
+@inject IHttpContextAccessor HttpContextAccessor
 
-<MudPopoverProvider />
+
 
 <PageTitle>Edit Account</PageTitle>
 
@@ -147,10 +149,10 @@ protected override async Task OnInitializedAsync()
 {
     try
     {
-        user = await UserAccessor.GetRequiredUserAsync(HttpContext);
+        user = await UserAccessor.GetRequiredUserAsync();
         
         // Initialize Input if null and populate on GET requests
-        if (HttpContext.Request.Method == "GET")
+        if (user != null)
         {
             Input = new InputModel
             {

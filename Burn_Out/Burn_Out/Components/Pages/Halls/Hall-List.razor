@@ -9,8 +9,11 @@
 
 @inject IHallRepository HallRepository
 @inject ApplicationDbContext DbContext
+@inject ISnackbar SnackBar
 
 <h3>Hall_List</h3>
+
+
 
 <MudPaper>
     <MudGrid>
@@ -50,9 +53,9 @@
                             .OrderBy(h => h.HallName)
                             .ToListAsync();
         }
-        catch
+        catch (Exception ex)
         {
-            
+			SnackBar.Add($"Error loading halls: {ex.Message}", Severity.Error);
         }
     }
 }

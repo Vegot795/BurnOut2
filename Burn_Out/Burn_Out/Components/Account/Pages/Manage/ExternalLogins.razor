@@ -1,8 +1,9 @@
 ﻿@page "/Account/Manage/ExternalLogins"
 
+@using Infrastructure
+@using Infrastructure.Models
 @using Microsoft.AspNetCore.Authentication
 @using Microsoft.AspNetCore.Identity
-@using Infrastructure
 
 @inject UserManager<ApplicationUser> UserManager
 @inject SignInManager<ApplicationUser> SignInManager
@@ -85,7 +86,7 @@
 
     protected override async Task OnInitializedAsync()
     {
-        user = await UserAccessor.GetRequiredUserAsync(HttpContext);
+        user = await UserAccessor.GetRequiredUserAsync();
         currentLogins = await UserManager.GetLoginsAsync(user);
         otherLogins = (await SignInManager.GetExternalAuthenticationSchemesAsync())
             .Where(auth => currentLogins.All(ul => auth.Name != ul.LoginProvider))

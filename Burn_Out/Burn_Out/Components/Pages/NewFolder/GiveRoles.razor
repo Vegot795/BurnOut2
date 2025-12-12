@@ -1,0 +1,86 @@
+﻿@page "/give-roles"
+
+@rendermode InteractiveServer
+
+@using Core.Models
+@using Microsoft.AspNetCore.Identity
+@using Infrastructure.Models
+@inject UserManager<ApplicationUser> UserManager
+@inject RoleManager<IdentityRole> RoleManager
+@inject AuthenticationStateProvider AuthStateProvider
+@using MudBlazor
+
+<h3>GiveRoles</h3>
+<MudPopoverProvider />
+
+<MudPaper>
+    <MudGrid>
+        <MudItem>
+            <MudText Typo="Typo.h6">Twoja aktualna rola</MudText>
+            <MudText>@userRole</MudText>
+        </MudItem>
+        <MudItem>
+            <MudRadioGroup T="UserRoles" @bind-Value="_selectedRole">
+                <MudRadio Value="@UserRoles.Client">Klient</MudRadio>
+                <MudRadio Value="@UserRoles.Employee">Pracownik</MudRadio>
+                <MudRadio Value="@UserRoles.Admin">Administrator</MudRadio>
+            </MudRadioGroup>
+        </MudItem>
+        <MudItem>
+            <MudButton ButtonType="ButtonType.Submit" Variant="Variant.Filled" OnClick="OnSubmitAsync">Akceptuj</MudButton>
+        </MudItem>
+    </MudGrid>
+</MudPaper>
+
+@code {
+    private bool _loading = false;
+    private UserRoles _selectedRole;
+    private List<UserRoles> Roles = Enum.GetValues<UserRoles>().ToList();
+    private string userRole;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var authState = await AuthStateProvider.GetAuthenticationStateAsync();
+        var user = await UserManager.GetUserAsync(authState.User);
+        if (user != null)
+        {
+            var roles = await UserManager.GetRolesAsync(user);
+            userRole = roles.FirstOrDefault() ?? "Brak roli";
+        }
+        else
+        {
+            userRole = "Nie zalogowano";
+        }
+    }
+
+    private async Task OnSubmitAsync()
+    {
+        _loading = true;
+
+        var authState = await AuthStateProvider.GetAuthenticationStateAsync();
+        var user = await UserManager.GetUserAsync(authState.User);
+
+        if (user == null)
+        {
+            // Show error: user not logged in
+            _loading = false;
+            return;
+        }
+
+        var roleName = _selectedRole.ToString();
+
+        // Make sure role exists
+        if (!await RoleManager.RoleExistsAsync(roleName))
+        {
+            await RoleManager.CreateAsync(new IdentityRole(roleName));
+        }
+
+        // Add role to user
+        if (!await UserManager.IsInRoleAsync(user, roleName))
+        {
+            await UserManager.AddToRoleAsync(user, roleName);
+        }
+
+        _loading = false;
+    }
+}

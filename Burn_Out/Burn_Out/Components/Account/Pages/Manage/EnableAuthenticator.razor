@@ -4,8 +4,9 @@
 @using System.Globalization
 @using System.Text
 @using System.Text.Encodings.Web
-@using Microsoft.AspNetCore.Identity
 @using Infrastructure
+@using Infrastructure.Models
+@using Microsoft.AspNetCore.Identity
 
 @inject UserManager<ApplicationUser> UserManager
 @inject IdentityUserAccessor UserAccessor
@@ -83,7 +84,7 @@ else
 
     protected override async Task OnInitializedAsync()
     {
-        user = await UserAccessor.GetRequiredUserAsync(HttpContext);
+        user = await UserAccessor.GetRequiredUserAsync();
 
         await LoadSharedKeyAndQrCodeUriAsync(user);
     }
