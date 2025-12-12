@@ -1,0 +1,206 @@
+@page "/Account"
+@using System.ComponentModel.DataAnnotations
+@using Microsoft.AspNetCore.Identity
+@using Burn_Out.Data
+@using Burn_Out.Components.Account
+@using Microsoft.AspNetCore.Authorization
+
+@attribute [Authorize]
+
+@inject UserManager<ApplicationUser> UserManager
+@inject IdentityUserAccessor UserAccessor
+@inject NavigationManager NavigationManager
+
+
+<PageTitle>Account Information</PageTitle>
+
+<MudContainer MaxWidth="MaxWidth.Large" Class="mt-4">
+    <MudPaper Class="pa-4">
+        <MudText Typo="Typo.h4" GutterBottom="true">Account Information</MudText>
+        
+        @if (isLoading)
+        {
+            <MudProgressCircular Color="Color.Primary" Indeterminate="true" />
+        }
+        else if (user == null)
+        {
+            <MudAlert Severity="Severity.Error">Unable to load user data.</MudAlert>
+        }
+        else
+        {
+            <MudGrid>
+                <MudItem xs="12" sm="6" md="4">
+                    <MudCard>
+                        <MudCardHeader>
+                            <CardHeaderContent>
+                                <MudText Typo="Typo.h6">Personal Information</MudText>
+                            </CardHeaderContent>
+                        </MudCardHeader>
+                        <MudCardContent>
+                            <MudStack Spacing="3">
+                                <div>
+                                    <MudText Typo="Typo.caption" Color="Color.Secondary">First Name</MudText>
+                                    <MudText Typo="Typo.body1">@(user.FirstName ?? "Not provided")</MudText>
+                                </div>
+                                <div>
+                                    <MudText Typo="Typo.caption" Color="Color.Secondary">Last Name</MudText>
+                                    <MudText Typo="Typo.body1">@(user.LastName ?? "Not provided")</MudText>
+                                </div>
+                                <div>
+                                    <MudText Typo="Typo.caption" Color="Color.Secondary">Date of Birth</MudText>
+                                    <MudText Typo="Typo.body1">@(user.DateOfBirth?.ToString("MMMM dd, yyyy") ?? "Not provided")</MudText>
+                                </div>
+                            </MudStack>
+                        </MudCardContent>
+                    </MudCard>
+                </MudItem>
+
+                <MudItem xs="12" sm="6" md="4">
+                    <MudCard>
+                        <MudCardHeader>
+                            <CardHeaderContent>
+                                <MudText Typo="Typo.h6">Contact Information</MudText>
+                            </CardHeaderContent>
+                        </MudCardHeader>
+                        <MudCardContent>
+                            <MudStack Spacing="3">
+                                <div>
+                                    <MudText Typo="Typo.caption" Color="Color.Secondary">Email</MudText>
+                                    <MudText Typo="Typo.body1">@user.Email</MudText>
+                                    @if (!user.EmailConfirmed)
+                                    {
+                                        <MudChip T="string" Size="Size.Small" Color="Color.Warning">Not Confirmed</MudChip>
+                                    }
+                                </div>
+                                <div>
+                                    <MudText Typo="Typo.caption" Color="Color.Secondary">Phone Number</MudText>
+                                    <MudText Typo="Typo.body1">@(user.PhoneNumber ?? "Not provided")</MudText>
+                                    @if (!string.IsNullOrEmpty(user.PhoneNumber) && !user.PhoneNumberConfirmed)
+                                    {
+                                        <MudChip T="string" Size="Size.Small" Color="Color.Warning">Not Confirmed</MudChip>
+                                    }
+                                </div>
+                                <div>
+                                    <MudText Typo="Typo.caption" Color="Color.Secondary">Username</MudText>
+                                    <MudText Typo="Typo.body1">@user.UserName</MudText>
+                                </div>
+                            </MudStack>
+                        </MudCardContent>
+                    </MudCard>
+                </MudItem>
+
+                <MudItem xs="12" sm="6" md="4">
+                    <MudCard>
+                        <MudCardHeader>
+                            <CardHeaderContent>
+                                <MudText Typo="Typo.h6">Address</MudText>
+                            </CardHeaderContent>
+                        </MudCardHeader>
+                        <MudCardContent>
+                            <MudStack Spacing="3">
+                                <div>
+                                    <MudText Typo="Typo.caption" Color="Color.Secondary">Street Address</MudText>
+                                    <MudText Typo="Typo.body1">@(user.Address ?? "Not provided")</MudText>
+                                </div>
+                                <div>
+                                    <MudText Typo="Typo.caption" Color="Color.Secondary">City</MudText>
+                                    <MudText Typo="Typo.body1">@(user.City ?? "Not provided")</MudText>
+                                </div>
+                                <div>
+                                    <MudText Typo="Typo.caption" Color="Color.Secondary">State</MudText>
+                                    <MudText Typo="Typo.body1">@(user.State ?? "Not provided")</MudText>
+                                </div>
+                                <div>
+                                    <MudText Typo="Typo.caption" Color="Color.Secondary">ZIP Code</MudText>
+                                    <MudText Typo="Typo.body1">@(user.ZipCode ?? "Not provided")</MudText>
+                                </div>
+                                <div>
+                                    <MudText Typo="Typo.caption" Color="Color.Secondary">Country</MudText>
+                                    <MudText Typo="Typo.body1">@(user.Country ?? "Not provided")</MudText>
+                                </div>
+                            </MudStack>
+                        </MudCardContent>
+                    </MudCard>
+                </MudItem>
+
+                <MudItem xs="12">
+                    <MudCard>
+                        <MudCardHeader>
+                            <CardHeaderContent>
+                                <MudText Typo="Typo.h6">Account Details</MudText>
+                            </CardHeaderContent>
+                        </MudCardHeader>
+                        <MudCardContent>
+                            <MudStack Row="true" Spacing="6">
+                                <div>
+                                    <MudText Typo="Typo.caption" Color="Color.Secondary">Account Created</MudText>
+                                    <MudText Typo="Typo.body1">@user.CreatedAt.ToString("MMMM dd, yyyy 'at' hh:mm tt")</MudText>
+                                </div>
+                                @if (user.LastModifiedAt.HasValue)
+                                {
+                                    <div>
+                                        <MudText Typo="Typo.caption" Color="Color.Secondary">Last Modified</MudText>
+                                        <MudText Typo="Typo.body1">@user.LastModifiedAt.Value.ToString("MMMM dd, yyyy 'at' hh:mm tt")</MudText>
+                                    </div>
+                                }
+                                <div>
+                                    <MudText Typo="Typo.caption" Color="Color.Secondary">Two-Factor Authentication</MudText>
+                                    <MudText Typo="Typo.body1">
+                                        @if (user.TwoFactorEnabled)
+                                        {
+                                            <MudChip T="string" Size="Size.Small" Color="Color.Success">Enabled</MudChip>
+                                        }
+                                        else
+                                        {
+                                            <MudChip T="string" Size="Size.Small" Color="Color.Default">Disabled</MudChip>
+                                        }
+                                    </MudText>
+                                </div>
+                            </MudStack>
+                        </MudCardContent>
+                    </MudCard>
+                </MudItem>
+
+                <MudItem xs="12">
+                    <MudStack Row="true" Justify="Justify.SpaceBetween">
+                        <MudButton Variant="Variant.Filled" 
+                                   Color="Color.Primary" 
+                                   StartIcon="@Icons.Material.Filled.Edit"
+                                   Href="/Account/Edit">
+                            Edit Profile
+                        </MudButton>
+                        <MudButton Variant="Variant.Outlined" 
+                                   Color="Color.Default"
+                                   Href="/">
+                            Back to Home
+                        </MudButton>
+                    </MudStack>
+                </MudItem>
+            </MudGrid>
+        }
+    </MudPaper>
+</MudContainer>
+
+@code {
+    private ApplicationUser? user;
+    private bool isLoading = true;
+
+    [CascadingParameter]
+    private HttpContext HttpContext { get; set; } = default!;
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            user = await UserAccessor.GetRequiredUserAsync(HttpContext);
+        }
+        catch (Exception)
+        {
+            user = null;
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+}

@@ -91,10 +91,20 @@ namespace Burn_Out.Components.Account
 
                 if (userId != null && email != null)
                 {
+                    // Optionally fetch additional user data from database
+                    await using var scope = scopeFactory.CreateAsyncScope();
+                    var userManager = scope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
+                    var user = await userManager.FindByIdAsync(userId);
+
                     state.PersistAsJson(nameof(UserInfo), new UserInfo
                     {
                         UserId = userId,
                         Email = email,
+                        FirstName = user?.FirstName,
+                        LastName = user?.LastName,
+                        PhoneNumber = int.TryParse(user?.PhoneNumber, out var phone) ? phone : (int?)null,
+                        DateOfBirth = user?.DateOfBirth,
+                        CreatedAt = user.CreatedAt
                     });
                 }
             }
