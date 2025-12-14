@@ -1,14 +1,22 @@
 ﻿using Infrastructure.Models;
-using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Components;
+using MudBlazor;
 
+
+
+[Microsoft.AspNetCore.Components.Route("api/[controller]")]
 [ApiController]
 [Route("auth")]
 public class AuthController : ControllerBase
 {
     private readonly SignInManager<ApplicationUser> _signInManager;
-
-    public AuthController(SignInManager<ApplicationUser> signInManager)
+    private readonly UserManager<ApplicationUser> _userManager;
+    private readonly ILogger<AuthController> _logger;
+    public AuthController(
+        SignInManager<ApplicationUser> signInManager,
+        UserManager<ApplicationUser> userManager,
+        ILogger<AuthController> logger)
     {
         _signInManager = signInManager;
     }
