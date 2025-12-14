@@ -1,5 +1,7 @@
-﻿using Microsoft.AspNetCore.Identity;
+﻿
+using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.DependencyInjection;
+using Core.Models;
 
 public static class IdentitySeeder
 {
@@ -7,13 +9,13 @@ public static class IdentitySeeder
     {
         var roleManager = services.GetRequiredService<RoleManager<IdentityRole>>();
 
-        string[] roles = { "Admin", "Employee", "Client" };
-
-        foreach (var role in roles)
+        foreach (var role in Enum.GetValues<UserRoles>())
         {
-            if (!await roleManager.RoleExistsAsync(role))
+            var roleName = role.ToString();
+
+            if (!await roleManager.RoleExistsAsync(roleName))
             {
-                await roleManager.CreateAsync(new IdentityRole(role));
+                await roleManager.CreateAsync(new IdentityRole(roleName));
             }
         }
     }

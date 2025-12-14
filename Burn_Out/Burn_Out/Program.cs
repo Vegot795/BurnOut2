@@ -12,6 +12,8 @@ using Microsoft.EntityFrameworkCore;
 using MudBlazor.Services;
 using System;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+using Microsoft.AspNetCore.Components.Server;
+
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -49,14 +51,6 @@ builder.Services.AddCascadingAuthenticationState();
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
 // Configure authentication cookies
-builder.Services.ConfigureApplicationCookie(options =>
-{
-    options.Cookie.HttpOnly = true;
-    options.ExpireTimeSpan = TimeSpan.FromDays(30);
-    options.LoginPath = "/account/login";
-    options.LogoutPath = "/api/auth/logout";
-    options.SlidingExpiration = true;
-});
 
 // Add authentication/authorization state for Blazor
 builder.Services.AddScoped<IdentityUserAccessor>();
@@ -73,34 +67,26 @@ builder.Services.AddHttpContextAccessor();
 builder.Services.AddHttpClient();
 
 // Fix: Configure HttpClient without NavigationManager
-builder.Services.AddHttpClient("ServerAPI", (sp, client) =>
-{
-    // Get the current request's base address
-    var httpContextAccessor = sp.GetRequiredService<IHttpContextAccessor>();
-    var request = httpContextAccessor.HttpContext?.Request;
+builder.Services.AddHttpContextAccessor();
 
-    if (request != null)
-    {
-        client.BaseAddress = new Uri($"{request.Scheme}://{request.Host}/");
-    }
-    else
-    {
-        // Fallback for WebAssembly or when not in HTTP context
-        client.BaseAddress = new Uri(builder.Configuration["BaseUrl"] ?? "https://localhost:5001/");
-    }
-})
-.ConfigurePrimaryHttpMessageHandler(() => new HttpClientHandler
+builder.Services.AddHttpClient("LocalApi", client =>
 {
-    UseCookies = true,
-    AllowAutoRedirect = false
+    client.BaseAddress = new Uri("https://localhost:5230");
 });
+
+
 
 // Add a default HttpClient for general use
 builder.Services.AddScoped(sp =>
     new HttpClient
     {
-        BaseAddress = new Uri(builder.Configuration["BaseUrl"] ?? "https://localhost:5001/")
+        BaseAddress = new Uri(builder.Configuration["BaseUrl"] ?? "https://localhost:5230/")
     });
+
+builder.Services.Configure<CircuitOptions>(options => { options.DetailedErrors = true; });
+
+
+
 
 var app = builder.Build();
 
@@ -152,46 +138,23 @@ app.MapRazorComponents<App>()
     .AddInteractiveWebAssemblyRenderMode()
     .AddAdditionalAssemblies(typeof(Burn_Out.Client._Imports).Assembly);
 
-app.MapPost("/api/auth/login", async (
-    LoginModel model,
-    SignInManager<ApplicationUser> signInManager,
-    UserManager<ApplicationUser> userManager,
-    HttpContext context) =>
+
+app.MapPost("/auth/login", async (
+    LoginRequest model,
+    SignInManager<ApplicationUser> signInManager) =>
 {
-    try
-    {
-   
-        await context.SignOutAsync(IdentityConstants.ExternalScheme);
+    var result = await signInManager.PasswordSignInAsync(
+        model.Email,
+        model.Password,
+        false,
+        false);
 
-        var user = await userManager.FindByEmailAsync(model.Email);
-        if (user == null)
-            return Results.Json(new { success = false, message = "Invalid login attempt" }, statusCode: 400);
-
-        // Sign in the user
-        var result = await signInManager.PasswordSignInAsync(
-            user,
-            model.Password,
-            model.RememberMe,
-            lockoutOnFailure: false);
-
-        if (result.Succeeded)
-        {
-            return Results.Json(new { success = true });
-        }
-        else if (result.IsLockedOut)
-        {
-            return Results.Json(new { success = false, message = "Account locked out" }, statusCode: 423);
-        }
-        else
-        {
-            return Results.Json(new { success = false, message = "Invalid login attempt" }, statusCode: 400);
-        }
-    }
-    catch (Exception ex)
-    {
-        return Results.Json(new { success = false, message = "An error occurred" }, statusCode: 500);
-    }
+    return result.Succeeded
+        ? Results.Redirect("/")
+        : Results.Redirect("/login?error=1");
 });
+
+
 
 app.MapPost("/api/auth/logout", async (
     SignInManager<ApplicationUser> signInManager,

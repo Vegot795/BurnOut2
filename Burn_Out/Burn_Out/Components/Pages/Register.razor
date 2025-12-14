@@ -1,0 +1,80 @@
+﻿@page "/register"
+@inject UserManager<ApplicationUser> UserManager
+@inject NavigationManager NavigationManager
+@inject SignInManager<ApplicationUser> SignInManager
+@using Core.Models
+@using Infrastructure.Models
+@using Microsoft.AspNetCore.Identity
+@using MudBlazor
+@using Microsoft.AspNetCore.Identity.EntityFrameworkCore
+
+<h3>Register</h3>
+
+<MudPaper>
+	<MudText Typo="Typo.h6">Rejestracja</MudText>
+
+	<MudForm @ref="form" Validate">
+		<MudTextField @bind-value="Email" Label="Email" Required="true"/>
+		<MudTextField @bind-Value="Password" Label="Hasło" Required="true"/>
+		<MudTextField @bind-value="ConfirmPassword" Label="Potwierdź hasło" Required="true"/>
+
+		<MudSelect @bind-value="SelectedRole" Label="Rola" Required="true">
+			<MudSelectItem Value="@UserRoles.Client">Klient</MudSelectItem>
+			<MudSelectItem Value="@UserRoles.Employee">Pracownik</MudSelectItem>
+			<MudSelectItem Value="@UserRoles.Admin">Administrator</MudSelectItem>
+		</MudSelect>
+
+		<MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="RegisterUser" Disabled="@isSubmitting">Stwórz konto</MudButton>
+
+		<MudText Color="Color.Error" Typo=Typo.body2>@errorMessage</MudText>	
+	</MudForm>
+</MudPaper>
+
+@code {
+	private MudForm form;
+	private string Email;
+	private string Password;
+	private string ConfirmPassword;
+	private UserRoles SelectedRole = UserRoles.Client;
+	private bool isSubmitting = false;
+	private string errorMessage;
+
+	private async Task RegisterUser()
+	{
+		errorMessage = string.Empty;
+		isSubmitting = true;
+
+		await form.Validate();
+
+		if (Password != ConfirmPassword)
+		{
+			errorMessage = "Hasła nie są takie same";
+			isSubmitting = false;
+			return;
+		}
+
+		var user = new ApplicationUser
+			{
+				UserName = Email,
+				Email = Email,
+				EmailConfirmed = true
+			};
+		var result = await UserManager.CreateAsync(user, Password);
+
+		if (result.Succeeded)
+		{
+			await UserManager.AddToRoleAsync(user, SelectedRole.ToString());
+
+			await SignInManager.SignInAsync(user, isPersistent: false);
+
+			NavigationManager.NavigateTo("/");
+		}
+		else
+		{
+			errorMessage = string.Join(", ", result.Errors.Select(e => e.Description));
+			await UserManager.AddToRoleAsync(user, SelectedRole.ToString());
+
+			isSubmitting = false;
+		}
+	}
+}

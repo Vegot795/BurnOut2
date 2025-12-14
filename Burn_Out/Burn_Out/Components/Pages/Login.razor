@@ -1,36 +1,63 @@
 ﻿@page "/login"
-@using Infrastructure.Models
-@using Microsoft.AspNetCore.Identity
-@inject SignInManager<ApplicationUser> SignInManager
+@rendermode InteractiveServer
+
 @inject NavigationManager Nav
+@using MudBlazor
 
-<MudPaper Width="400px" Class="mx-auto mt-10 pa-6">
-    <MudText Typo="Typo.h5">Login</MudText>
+<PageTitle>Login</PageTitle>
 
-    <MudTextField @bind-Value="email" Label="Email" />
-    <MudTextField @bind-Value="password"
-                  Label="Password"
-                  InputType="InputType.Password" />
+<MudContainer MaxWidth="MaxWidth.Small" Class="mt-10">
+    <MudPaper Elevation="4" Class="pa-6">
 
-    <MudButton OnClick="LoginLogic"
-               Color="Color.Primary">
-        Login
-    </MudButton>
-</MudPaper>
+        <MudText Typo="Typo.h5" Class="mb-4">
+            Sign in
+        </MudText>
+
+        @if (!string.IsNullOrEmpty(errorMessage))
+        {
+            <MudAlert Severity="Severity.Error" Class="mb-3">
+                @errorMessage
+            </MudAlert>
+        }
+
+        <MudTextField Label="Email"
+                      @bind-Value="email"
+                      InputType="InputType.Email"
+                      Required="true"
+                      Class="mb-3" />
+
+        <MudTextField Label="Password"
+                      @bind-Value="password"
+                      InputType="InputType.Password"
+                      Required="true"
+                      Class="mb-4" />
+
+        <MudButton Variant="Variant.Filled"
+                   Color="Color.Primary"
+                   FullWidth="true"
+                   OnClick="LoginLogic">
+            Login
+        </MudButton>
+
+    </MudPaper>
+</MudContainer>
 
 @code {
-    string email = "";
-    string password = "";
+    private string email;
+    private string password;
+    private string errorMessage;
 
-    async Task LoginLogic()
+    void LoginLogic()
     {
-        var result = await SignInManager.PasswordSignInAsync(
-            email,
-            password,
-            isPersistent: true,
-            lockoutOnFailure: false);
+        if (string.IsNullOrWhiteSpace(email) || string.IsNullOrWhiteSpace(password))
+        {
+            errorMessage = "Email and password are required.";
+            return;
+        }
 
-        if (result.Succeeded)
-            Nav.NavigateTo("/");
+        var url =
+            $"/auth/login?Email={Uri.EscapeDataString(email)}&Password={Uri.EscapeDataString(password)}";
+
+        Nav.NavigateTo(url, forceLoad: true);
     }
 }
