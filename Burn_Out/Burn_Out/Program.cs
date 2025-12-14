@@ -1,15 +1,17 @@
-﻿using Burn_Out.Components.Account;
-using Burn_Out.Components;
+﻿using Burn_Out.Components;
+using Burn_Out.Components.Account;
+using Core.Interfaces;
+using Infrastructure.Data;
+using Infrastructure.Models;
+using Infrastructure.Repositories;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using MudBlazor.Services;
-using Infrastructure.Data;
-using Core.Interfaces;
-using Infrastructure.Repositories;
-using Infrastructure.Models;
-using Microsoft.AspNetCore.Components;
-using Microsoft.AspNetCore.Authentication;
+using System;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -24,23 +26,27 @@ builder.Services.AddMudServices();
 // Configure EF Core
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection")
     ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
+
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
-    options.UseSqlServer(connectionString));
+    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
-builder.Services.AddDatabaseDeveloperPageExceptionFilter();
-
-// Configure Identity
-builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options =>
-{
-    options.SignIn.RequireConfirmedAccount = false;
-    options.Password.RequireDigit = false;
-    options.Password.RequireLowercase = false;
-    options.Password.RequireUppercase = false;
-    options.Password.RequireNonAlphanumeric = false;
-    options.Password.RequiredLength = 6;
-})
+builder.Services
+    .AddIdentity<ApplicationUser, IdentityRole>()
     .AddEntityFrameworkStores<ApplicationDbContext>()
     .AddDefaultTokenProviders();
+
+builder.Services.AddAuthentication();
+builder.Services.AddAuthorization(options =>
+{
+    options.AddPolicy("AdminOnly",
+        policy => policy.RequireRole("Admin"));
+
+    options.AddPolicy("Staff",
+        policy => policy.RequireRole("Admin", "Employee"));
+});
+
+builder.Services.AddCascadingAuthenticationState();
+builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
 // Configure authentication cookies
 builder.Services.ConfigureApplicationCookie(options =>
@@ -48,18 +54,17 @@ builder.Services.ConfigureApplicationCookie(options =>
     options.Cookie.HttpOnly = true;
     options.ExpireTimeSpan = TimeSpan.FromDays(30);
     options.LoginPath = "/account/login";
-    options.LogoutPath = "/account/logout";
+    options.LogoutPath = "/api/auth/logout";
     options.SlidingExpiration = true;
 });
 
 // Add authentication/authorization state for Blazor
-builder.Services.AddCascadingAuthenticationState();
 builder.Services.AddScoped<IdentityUserAccessor>();
 builder.Services.AddScoped<IdentityRedirectManager>();
 builder.Services.AddScoped<AuthenticationStateProvider, PersistingRevalidatingAuthenticationStateProvider>();
 
+
 // Add authentication for WebAssembly
-builder.Services.AddAuthorizationCore();
 
 // Custom repositories
 builder.Services.AddScoped<IHallRepository, HallRepository>();
@@ -99,23 +104,32 @@ builder.Services.AddScoped(sp =>
 
 var app = builder.Build();
 
-// Configure appsettings.json to include BaseUrl
-// Add to appsettings.json:
-// {
-//   "BaseUrl": "https://localhost:5001"
-// }
+app.MapGet("/api/auth/check", async (
+    HttpContext context,
+    UserManager<ApplicationUser> userManager) =>
+{
+    var user = await userManager.GetUserAsync(context.User);
+    if (user != null)
+    {
+        return Results.Json(new
+        {
+            isAuthenticated = true,
+            email = user.Email,
+            userName = user.UserName,
+            userId = user.Id
+        });
+    }
 
-// Seed roles/admin user
+    return Results.Json(new { isAuthenticated = false });
+});
+
+
 using (var scope = app.Services.CreateScope())
 {
     var services = scope.ServiceProvider;
-    var roleManager = services.GetRequiredService<RoleManager<IdentityRole>>();
-    var userManager = services.GetRequiredService<UserManager<ApplicationUser>>();
-
-    await IdentitySeeder.SeedRolesAndAdminAsync(roleManager, userManager);
+    await IdentitySeeder.SeedRolesAsync(services);
 }
 
-// Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
     app.UseWebAssemblyDebugging();
@@ -133,13 +147,11 @@ app.UseAntiforgery();
 app.UseAuthentication();
 app.UseAuthorization();
 
-// Map Razor Components
 app.MapRazorComponents<App>()
     .AddInteractiveServerRenderMode()
     .AddInteractiveWebAssemblyRenderMode()
     .AddAdditionalAssemblies(typeof(Burn_Out.Client._Imports).Assembly);
 
-// Enhanced login endpoint
 app.MapPost("/api/auth/login", async (
     LoginModel model,
     SignInManager<ApplicationUser> signInManager,
@@ -148,7 +160,7 @@ app.MapPost("/api/auth/login", async (
 {
     try
     {
-        // Clear any existing external cookie
+   
         await context.SignOutAsync(IdentityConstants.ExternalScheme);
 
         var user = await userManager.FindByEmailAsync(model.Email);
@@ -181,34 +193,16 @@ app.MapPost("/api/auth/login", async (
     }
 });
 
-// Add logout endpoint for WebAssembly
 app.MapPost("/api/auth/logout", async (
     SignInManager<ApplicationUser> signInManager,
     HttpContext context) =>
 {
     await signInManager.SignOutAsync();
     return Results.Json(new { success = true });
-});
+    });
 
-// Add authentication check endpoint
-app.MapGet("/api/auth/check", async (
-    HttpContext context,
-    UserManager<ApplicationUser> userManager) =>
-{
-    var user = await userManager.GetUserAsync(context.User);
-    if (user != null)
-    {
-        return Results.Json(new
-        {
-            isAuthenticated = true,
-            email = user.Email,
-            userName = user.UserName,
-            userId = user.Id
-        });
-    }
 
-    return Results.Json(new { isAuthenticated = false });
-});
+
 
 // Add additional endpoints required by the Identity /Account Razor components.
 app.MapAdditionalIdentityEndpoints();
