@@ -11,18 +11,7 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
         : base(options)
     {
     }
-
     public DbSet<HallModel> Halls { get; set; }
+    public DbSet<Measurement> Measurements { get; set; }
 
-    protected override void OnModelCreating(ModelBuilder builder)
-    {
-        base.OnModelCreating(builder);
-
-        builder.Entity<HallModel>(entity =>
-        {
-            entity.HasKey(e => e.Id);
-            entity.Property(e => e.HallName).IsRequired().HasMaxLength(100);
-            entity.Property(e => e.Capacity).IsRequired();
-        });
-    }
 }

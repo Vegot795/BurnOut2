@@ -14,5 +14,12 @@ namespace Burn_Out.Client
         public DateTime? DateOfBirth { get; set; }
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
         public string? Address { get; set; }
+
+        //Progress klienta
+
+        
+
+
+
     }
 }
