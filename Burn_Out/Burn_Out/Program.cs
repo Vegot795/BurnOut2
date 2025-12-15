@@ -30,7 +30,9 @@ var connectionString = builder.Configuration.GetConnectionString("DefaultConnect
     ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
 
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+    options.UseSqlServer(
+        builder.Configuration.GetConnectionString("DefaultConnection"),
+        b => b.MigrationsAssembly("Burn_Out")));
 
 builder.Services
     .AddIdentity<ApplicationUser, IdentityRole>()
@@ -160,7 +162,21 @@ app.MapGet("/auth/login", async (
         : Results.Redirect("/login?error=1");
 });
 
+app.MapGet("/auth/signin", async (
+    string email,
+    string password,
+    SignInManager<ApplicationUser> signInManager) =>
+{
+    var result = await signInManager.PasswordSignInAsync(
+        email,
+        password,
+        isPersistent: false,
+        lockoutOnFailure: false);
 
+    return result.Succeeded
+        ? Results.Redirect("/")
+        : Results.Redirect("/login?error=1");
+});
 
 
 app.MapPost("/api/auth/logout", async (
@@ -168,7 +184,7 @@ app.MapPost("/api/auth/logout", async (
     HttpContext context) =>
 {
     await signInManager.SignOutAsync();
-    return Results.Json(new { success = true });
+    return Results.Redirect("/login");
     });
 
 
@@ -180,9 +196,3 @@ app.MapAdditionalIdentityEndpoints();
 app.Run();
 
 // Login model for API
-public class LoginModel
-{
-    public string Email { get; set; } = "";
-    public string Password { get; set; } = "";
-    public bool RememberMe { get; set; }
-}

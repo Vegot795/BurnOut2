@@ -1,8 +1,10 @@
 ﻿@page "/login"
 @rendermode InteractiveServer
 
-
+@inject UserManager<ApplicationUser> UserManager
 @inject NavigationManager Nav
+@using Infrastructure.Models
+@using Microsoft.AspNetCore.Identity
 @using MudBlazor
 
 <PageTitle>Login</PageTitle>
@@ -48,12 +50,41 @@
     private string password;
     private string errorMessage;
 
-    void LoginLogic()
+    async Task LoginLogic()
     {
+        if (string.IsNullOrWhiteSpace(email) || string.IsNullOrWhiteSpace(password))
+        {
+            errorMessage = "Email and password are required.";
+            return;
+        }
+
+        var userExists = UserManager.FindByEmailAsync(email);
+
+        if (userExists == null)
+        {
+            errorMessage = "Użytkownik nie istnieje";
+            return;
+        }
+
+        var passwordValid = await UserManager.CheckPasswordAsync(await userExists, password);
+
+        if (!passwordValid)
+        {
+            errorMessage = "Nieprawidłowe hasło";
+            return;
+        }
+
         var url =
-            $"/auth/login?email={Uri.EscapeDataString(email)}&password={Uri.EscapeDataString(password)}";
+            $"/auth/login?Email={Uri.EscapeDataString(email)}&Password={Uri.EscapeDataString(password)}";
 
         Nav.NavigateTo(url, forceLoad: true);
     }
 
+    private async Task HandleKeyDown(KeyboardEventArgs e)
+    {
+        if (e.Key == "Enter")
+        {
+            await LoginLogic();
+        }
+    }
 }

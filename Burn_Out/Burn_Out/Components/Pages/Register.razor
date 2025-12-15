@@ -3,6 +3,7 @@
 @inject UserManager<ApplicationUser> UserManager
 @inject NavigationManager NavigationManager
 @inject SignInManager<ApplicationUser> SignInManager
+@inject ISnackbar Snackbar
 @using Core.Models
 @using Infrastructure.Models
 @using Microsoft.AspNetCore.Identity
@@ -13,6 +14,13 @@
 
 <MudPaper>
 	<MudText Typo="Typo.h6">Rejestracja</MudText>
+
+	@if (!string.IsNullOrEmpty(errorMessage))
+	{
+		<MudAlert Severity="Severity.Error" Class="mb-3">
+			@errorMessage
+		</MudAlert>
+	}
 
 	<MudForm @ref="form">
 		<MudTextField @bind-value="Email" Label="Email" Required="true"/>
@@ -49,6 +57,15 @@
 
 		await form.Validate();
 
+		var userExists = await UserManager.FindByEmailAsync(Email);
+
+		if (userExists != null)
+		{
+			errorMessage = "Użytkownik już istnieje";
+			isSubmitting = false;
+			return;
+		}
+
 		if (Password != ConfirmPassword)
 		{
 			errorMessage = "Hasła nie są takie same";
@@ -67,10 +84,9 @@
 		if (result.Succeeded)
 		{
 			await UserManager.AddToRoleAsync(user, SelectedRole.ToString());
+			Snackbar.Add("Konto zostało utworzone pomyślnie");
 
-			await SignInManager.SignInAsync(user, isPersistent: false);
-
-			//NavigationManager.NavigateTo("/");
+			NavigationManager.NavigateTo("/login");
 		}
 		else
 		{
