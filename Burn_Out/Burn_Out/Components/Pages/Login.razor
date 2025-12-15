@@ -1,105 +1,90 @@
-﻿
+﻿@page "/login"
+@rendermode InteractiveServer
 
-@using System.ComponentModel.DataAnnotations
-@using Burn_Out.Components.Account
+@inject UserManager<ApplicationUser> UserManager
+@inject NavigationManager Nav
 @using Infrastructure.Models
 @using Microsoft.AspNetCore.Identity
-@using Microsoft.AspNetCore.Authentication
+@using MudBlazor
 
+<PageTitle>Login</PageTitle>
 
+<MudContainer MaxWidth="MaxWidth.Small" Class="mt-10">
+    <MudPaper Elevation="4" Class="pa-6">
 
-@inject SignInManager<ApplicationUser> SignInManager
-@inject NavigationManager NavigationManager
-@inject ILogger<Login> Logger
-@inject IdentityRedirectManager RedirectManager
-@inject IHttpClientFactory ClientFactory
+        <MudText Typo="Typo.h5" Class="mb-4">
+            Sign in
+        </MudText>
 
-<PageTitle>Log in</PageTitle>
+        @if (!string.IsNullOrEmpty(errorMessage))
+        {
+            <MudAlert Severity="Severity.Error" Class="mb-3">
+                @errorMessage
+            </MudAlert>
+        }
 
-<h1>Log in</h1>
+        <MudTextField Label="Email"
+                      @bind-Value="email"
+                      InputType="InputType.Email"
+                      Required="true"
+                      Class="mb-3" />
 
-<EditForm Model="@Input" OnValidSubmit="LoginUser">
-    <DataAnnotationsValidator />
-    <ValidationSummary />
+        <MudTextField Label="Password"
+                      @bind-Value="password"
+                      InputType="InputType.Password"
+                      Required="true"
+                      Class="mb-4" />
 
-    <div class="form-floating mb-3">
-        <InputText @bind-Value="Input.Email" class="form-control" placeholder="Email" />
-        <label>Email</label>
-        <ValidationMessage For="() => Input.Email" />
-    </div>
+        <MudButton Variant="Variant.Filled"
+                   Color="Color.Primary"
+                   FullWidth="true"
+                   OnClick="LoginLogic">
+            Login
+        </MudButton>
 
-    <div class="form-floating mb-3">
-        <InputText @bind-Value="Input.Password" type="password" class="form-control" placeholder="Password" />
-        <label>Password</label>
-        <ValidationMessage For="() => Input.Password" />
-    </div>
-
-    <div class="checkbox mb-3">
-        <label>
-            <InputCheckbox @bind-Value="Input.RememberMe" /> Remember me
-        </label>
-    </div>
-
-    <button type="submit" class="btn btn-primary">Log in</button>
-</EditForm>
-
-@if (!string.IsNullOrEmpty(errorMessage))
-{
-    <div class="alert alert-danger">@errorMessage</div>
-}
+    </MudPaper>
+</MudContainer>
 
 @code {
-    private string? errorMessage;
-    private InputModel Input { get; set; } = new();
+    private string email;
+    private string password;
+    private string errorMessage;
 
-    private async Task LoginUser()
+    async Task LoginLogic()
     {
-        try
+        if (string.IsNullOrWhiteSpace(email) || string.IsNullOrWhiteSpace(password))
         {
-            if (OperatingSystem.IsWindows() || OperatingSystem.IsLinux() || OperatingSystem.IsMacOS())
-            {
-                // SERVER MODE → używamy SignInManager
-                var result = await SignInManager.PasswordSignInAsync(Input.Email, Input.Password, Input.RememberMe, false);
-                if (result.Succeeded)
-                {
-                    Logger.LogInformation("User logged in (server).");
-                    NavigationManager.NavigateTo("/", replace: true);
+            errorMessage = "Email and password are required.";
+            return;
+        }
 
-                }
-                else
-                {
-                    errorMessage = "Invalid login attempt.";
-                }
-            }
-            else
-            {
-                // WASM MODE → wywołujemy backend
-                var client = ClientFactory.CreateClient("ServerAPI");
-                var response = await client.PostAsJsonAsync("/login", Input);
-                if (response.IsSuccessStatusCode)
-                {
-                    NavigationManager.NavigateTo("/", forceLoad: true);
-                }
-                else
-                {
-                    errorMessage = "Invalid login attempt.";
-                }
-            }
-        }
-        catch (Exception ex)
+        var userExists = UserManager.FindByEmailAsync(email);
+
+        if (userExists == null)
         {
-            errorMessage = $"Error: {ex.Message}";
+            errorMessage = "Użytkownik nie istnieje";
+            return;
         }
+
+        var passwordValid = await UserManager.CheckPasswordAsync(await userExists, password);
+
+        if (!passwordValid)
+        {
+            errorMessage = "Nieprawidłowe hasło";
+            return;
+        }
+
+        var url =
+            $"/auth/login?Email={Uri.EscapeDataString(email)}&Password={Uri.EscapeDataString(password)}";
+
+        Nav.NavigateTo(url, forceLoad: true);
     }
 
-    private sealed class InputModel
+    private async Task HandleKeyDown(KeyboardEventArgs e)
     {
-        [Required, EmailAddress]
-        public string Email { get; set; } = "";
-
-        [Required, DataType(DataType.Password)]
-        public string Password { get; set; } = "";
-
-        public bool RememberMe { get; set; }
+        if (e.Key == "Enter")
+        {
+            await LoginLogic();
+        }
     }
 }

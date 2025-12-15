@@ -19,7 +19,7 @@
         </div>
 
         <div class="nav-item px-3">
-            <NavLink class="nav-link" href="/Account">
+            <NavLink class="nav-link" href="/userProfile">
                 <span class="bi bi-plus-square-fill-nav-menu" aria-hidden="true"></span> Profil
             </NavLink>
         </div>
@@ -36,13 +36,7 @@
             </NavLink>
         </div>
         
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="/test">
-                <span class="bi bi-plus-square-fill-nav-menu" aria-hidden="true"></span> Testowa
-            </NavLink>
-        </div>
-        
-        <AuthorizeView Roles="Employee, ADMIN">
+        <AuthorizeView Roles="Employee, Admin">
             <Authorized>
                 <div class="nav-item px-3">
                     <NavLink class="nav-link" href="/user-list">
@@ -66,7 +60,7 @@
                     </NavLink>
                 </div>
                 <div class="nav-item px-3">
-                    <form action="Account/Logout" method="post">
+                    <form action="/api/auth/logout" method="post">
                         <AntiforgeryToken />
                         <input type="hidden" name="ReturnUrl" value="@currentUrl" />
                         <button type="submit" class="nav-link">
@@ -77,12 +71,12 @@
             </Authorized>
             <NotAuthorized>
                 <div class="nav-item px-3">
-                    <NavLink class="nav-link" href="Account/Register">
+                    <NavLink class="nav-link" href="/user/register">
                         <span class="bi bi-person-nav-menu" aria-hidden="true"></span> Register
                     </NavLink>
                 </div>
                 <div class="nav-item px-3">
-                    <NavLink class="nav-link" href="Account/Login">
+                    <NavLink class="nav-link" href="/login">
                         <span class="bi bi-person-badge-nav-menu" aria-hidden="true"></span> Login
                     </NavLink>
                 </div>

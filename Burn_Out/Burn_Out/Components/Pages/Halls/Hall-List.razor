@@ -1,5 +1,7 @@
 ﻿@page "/hall-list"
 
+@rendermode InteractiveServer
+
 @using Infrastructure
 @using Core.Models
 @using Microsoft.EntityFrameworkCore
@@ -55,7 +57,12 @@
         }
         catch (Exception ex)
         {
-			SnackBar.Add($"Error loading halls: {ex.Message}", Severity.Error);
+            SnackBar.Add($"Error loading halls: {ex.Message}", Severity.Error);
+        }
+        finally
+        {
+            _loading = false;
+            StateHasChanged();
         }
     }
 }

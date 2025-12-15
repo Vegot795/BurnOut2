@@ -1,0 +1,99 @@
+﻿@page "/user/register"
+
+@inject UserManager<ApplicationUser> UserManager
+@inject NavigationManager NavigationManager
+@inject SignInManager<ApplicationUser> SignInManager
+@inject ISnackbar Snackbar
+@using Core.Models
+@using Infrastructure.Models
+@using Microsoft.AspNetCore.Identity
+@using MudBlazor
+@using Microsoft.AspNetCore.Identity.EntityFrameworkCore
+
+<h3>Register</h3>
+
+<MudPaper>
+	<MudText Typo="Typo.h6">Rejestracja</MudText>
+
+	@if (!string.IsNullOrEmpty(errorMessage))
+	{
+		<MudAlert Severity="Severity.Error" Class="mb-3">
+			@errorMessage
+		</MudAlert>
+	}
+
+	<MudForm @ref="form">
+		<MudTextField @bind-value="Email" Label="Email" Required="true"/>
+		<MudTextField @bind-Value="Password" Label="Hasło" Required="true"/>
+		<MudTextField @bind-value="ConfirmPassword" Label="Potwierdź hasło" Required="true"/>
+
+		
+
+		<MudRadioGroup T="UserRoles" @bind-SelectedOption="SelectedRole" Row="true" Label="Wybierz rolę:">
+			<MudRadio T="UserRoles" Option="UserRoles.Client" Color="Color.Primary" Label="Klient">@UserRoles.Client.ToString()</MudRadio>
+			<MudRadio T="UserRoles" Option="UserRoles.Employee" Color="Color.Primary" Label="Pracownik">@UserRoles.Employee.ToString()</MudRadio>
+            <MudRadio T="UserRoles" Option="UserRoles.Admin" Color="Color.Primary" Label="Administrator">@UserRoles.Admin.ToString()</MudRadio>
+        </MudRadioGroup>
+
+		<MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="RegisterUser" Disabled="@isSubmitting">Stwórz konto</MudButton>
+
+		<MudText Color="Color.Error" Typo=Typo.body2>@errorMessage</MudText>	
+	</MudForm>
+</MudPaper>
+
+@code {
+	private MudForm form;
+	private string Email;
+	private string Password;
+	private string ConfirmPassword;
+	private UserRoles SelectedRole = UserRoles.Client;
+	private bool isSubmitting = false;
+	private string errorMessage;
+
+	private async Task RegisterUser()
+	{
+		errorMessage = string.Empty;
+		isSubmitting = true;
+
+		await form.Validate();
+
+		var userExists = await UserManager.FindByEmailAsync(Email);
+
+		if (userExists != null)
+		{
+			errorMessage = "Użytkownik już istnieje";
+			isSubmitting = false;
+			return;
+		}
+
+		if (Password != ConfirmPassword)
+		{
+			errorMessage = "Hasła nie są takie same";
+			isSubmitting = false;
+			return;
+		}
+
+		var user = new ApplicationUser
+			{
+				UserName = Email,
+				Email = Email,
+				EmailConfirmed = true
+			};
+		var result = await UserManager.CreateAsync(user, Password);
+
+		if (result.Succeeded)
+		{
+			await UserManager.AddToRoleAsync(user, SelectedRole.ToString());
+			Snackbar.Add("Konto zostało utworzone pomyślnie");
+
+			NavigationManager.NavigateTo("/login");
+		}
+		else
+		{
+			errorMessage = string.Join(", ", result.Errors.Select(e => e.Description));
+			await UserManager.AddToRoleAsync(user, SelectedRole.ToString());
+
+			isSubmitting = false;
+		}
+	}
+}
