@@ -139,20 +139,27 @@ app.MapRazorComponents<App>()
     .AddAdditionalAssemblies(typeof(Burn_Out.Client._Imports).Assembly);
 
 
-app.MapPost("/auth/login", async (
-    LoginRequest model,
+app.MapGet("/auth/login", async (
+    string email,
+    string password,
     SignInManager<ApplicationUser> signInManager) =>
 {
+    if (string.IsNullOrWhiteSpace(email) || string.IsNullOrWhiteSpace(password))
+    {
+        return Results.Redirect("/login?error=1");
+    }
+
     var result = await signInManager.PasswordSignInAsync(
-        model.Email,
-        model.Password,
-        false,
-        false);
+        email,
+        password,
+        isPersistent: true,
+        lockoutOnFailure: false);
 
     return result.Succeeded
         ? Results.Redirect("/")
         : Results.Redirect("/login?error=1");
 });
+
 
 
 

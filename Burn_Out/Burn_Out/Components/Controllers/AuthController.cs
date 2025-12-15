@@ -1,13 +1,15 @@
 ﻿using Infrastructure.Models;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Components;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
 using MudBlazor;
 
 
 
 [Microsoft.AspNetCore.Components.Route("api/[controller]")]
 [ApiController]
-[Route("auth")]
+[Microsoft.AspNetCore.Components.Route("auth")]
 public class AuthController : ControllerBase
 {
     private readonly SignInManager<ApplicationUser> _signInManager;
