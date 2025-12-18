@@ -3,10 +3,11 @@
 @using Core.Interfaces
 @using Infrastructure.Models
 @using Infrastructure.Data
+@using Microsoft.AspNetCore.Identity
 @using Microsoft.EntityFrameworkCore
 @using MudBlazor
 
-
+@inject UserManager<ApplicationUser> UserManager
 @inject IHallRepository HallRepository
 @inject ApplicationDbContext DbContext
 @inject ISnackbar SnackBar
@@ -15,19 +16,72 @@
 
 <MudPaper>
 	<MudGrid>
-		<MudTable Items="@memberList" Hover="true">
-
-		</MudTable>
+		<MudTabs Elevation="2" Rounded="true" ApplyEffectsToContainer="true" Centered="false">
+			@*--- Tab 1 ---*@
+			<MudTabPanel Text="Członkowie">
+				<MudTable Items="@memberList" Hover="true" Loading="@_loading" LoadingProgressColor="Color.Info">
+					<HeaderContent>
+						<MudTh>ID</MudTh>
+						<MudTh>Imię</MudTh>
+						<MudTh>Nazwisko</MudTh>
+						<MudTh>Email</MudTh>
+						<MudTh>Ostatnia obecność</MudTh>
+						<MudTh>Członek od</MudTh>
+						<MudTh>Akcja</MudTh>
+					</HeaderContent>
+					<RowTemplate>
+						<MudTd DataLabel="Id">@context.Id</MudTd>
+						<MudTd DataLabel="Imię">@context.FirstName</MudTd>
+						<MudTd DataLabel="Nazwisko">@context.LastName</MudTd>
+						<MudTd DataLabel="Email">@context.Email</MudTd>
+						<MudTd DataLabel="Ostatnia obecność">@context.LastPresent</MudTd>
+						<MudTd DataLabel="Członek od">@context.CreatedAt</MudTd>
+						<MudTd DataLabel="Akcje">
+							<MudButton Variant="Variant.Filled" Color="Color.Primary" Size="Size.Small" Href="@($"/user-profile/{context.Id}")">
+								Pokaż profil
+							</MudButton>
+						</MudTd>
+					</RowTemplate>
+				</MudTable>
+			</MudTabPanel>
+			@*--- Tab 2 ---*@
+			<MudTabPanel Text="Pracownicy">
+				<MudTable Items="@employeeList" Hover="true" Loading="@_loading" LoadingProgressColor="Color.Info">
+					<HeaderContent>
+						<MudTh>ID</MudTh>
+						<MudTh>Imię</MudTh>
+						<MudTh>Nazwisko</MudTh>
+						<MudTh>Ostatnia obecność</MudTh>
+						<MudTh>Członek od</MudTh>
+						<MudTh>Akcja</MudTh>
+					</HeaderContent>
+					<RowTemplate>
+						<MudTd DataLabel="Id">@context.Id</MudTd>
+						<MudTd DataLabel="Imię">@context.FirstName</MudTd>
+						<MudTd DataLabel="Nazwisko">@context.LastName</MudTd>
+						<MudTd DataLabel="Ostatnia obecność">@context.LastPresent</MudTd>
+						<MudTd DataLabel="Członek od">@context.CreatedAt</MudTd>
+						<MudTd DataLabel="Akcje">
+							<MudButton Variant="Variant.Filled" Color="Color.Primary" Size="Size.Small" Href="@($"/userProfile/{context.Id}")">
+								Pokaż profil
+							</MudButton>
+						</MudTd>
+					</RowTemplate>
+				</MudTable>
+			</MudTabPanel>
+		</MudTabs>
 	</MudGrid>
 </MudPaper>
 
 @code {
 	private bool _loading = false;
 	List<ApplicationUser> memberList = new List<ApplicationUser>();
+	List<ApplicationUser> employeeList = new List<ApplicationUser>();
 
 	protected override async Task OnInitializedAsync()
 	{
 		await LoadMembersAsync();
+		await LoadEmployeeList();
 	}
 
 	private async Task LoadMembersAsync()
@@ -35,13 +89,40 @@
 		try
 		{
 			_loading = true;
-			memberList = await DbContext.Users
+			memberList = (await UserManager.GetUsersInRoleAsync("Client"))
 							.OrderBy(u => u.UserName)
-							.ToListAsync();
+							.ToList();
 		}
 		catch (Exception ex)
 		{
 			SnackBar.Add($"Error loading members: {ex.Message}", Severity.Error);
+		}
+		finally
+		{
+			_loading = false;
+		}
+	}
+
+	private async Task LoadEmployeeList()
+	{
+		try
+		{
+			_loading = true; 
+
+			var employees = await UserManager.GetUsersInRoleAsync("Employee"); 
+			var admins = await UserManager.GetUsersInRoleAsync("Admin"); 
+
+			employeeList = employees.Concat(admins) 
+				.OrderBy(u => u.UserName) 
+				.ToList();
+		}
+		catch (Exception ex)
+		{
+			SnackBar.Add($"Error loading members: {ex.Message}", Severity.Error);
+		}
+		finally
+		{
+			_loading = false;
 		}
 	}
 }

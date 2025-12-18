@@ -13,11 +13,12 @@ namespace Burn_Out.Client
         public int? PhoneNumber { get; set; }
         public DateTime? DateOfBirth { get; set; }
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
-        public string? Address { get; set; }
+        public DateTime? LastModifiedAt { get; set; }
+        public DateTime? LastPresent { get; set; }
 
         //Progress klienta
 
-        
+
 
 
 

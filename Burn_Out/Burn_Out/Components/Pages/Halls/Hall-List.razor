@@ -12,8 +12,9 @@
 @inject IHallRepository HallRepository
 @inject ApplicationDbContext DbContext
 @inject ISnackbar SnackBar
+@inject NavigationManager NavigationManager
 
-<h3>Hall_List</h3>
+<h3>Lista Sal</h3>
 
 
 
@@ -23,12 +24,15 @@
             <HeaderContent>
                 <MudTh>Nazwa</MudTh>
                 <MudTh>Pojemność</MudTh>
-                <MudTh>Czy Zarezerwowana?</MudTh>
+                <MudTh>Możliwość rezerwacnji</MudTh>
+                <MudTh>Akcje</MudTh>
             </HeaderContent>
             <RowTemplate>
-                <MudTd DataLabel="Nazwa">@context.HallName</MudTd>
                 <MudTd DataLabel="Pojemność">@context.Capacity</MudTd>
                 <MudTd DataLabel="Dostępność">@context.IsAvailable</MudTd>
+                <MudTd DataLabel="Dostępność">
+                    <MudButton Variant="Variant.Filled" OnClick="@(() => NavigationManager.NavigateTo("/hall-reservation"))">Zarezerwuj</MudButton>
+                </MudTd>
             </RowTemplate>
         </MudTable>
         <MudItem>

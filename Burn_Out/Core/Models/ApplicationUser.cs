@@ -21,4 +21,5 @@ public class ApplicationUser : IdentityUser
 
     public DateTime? LastModifiedAt { get; set; }
     public ICollection<Measurement> Measurements { get; set; } = new List<Measurement>();
+    public DateTime? LastPresent { get; set; }
 }

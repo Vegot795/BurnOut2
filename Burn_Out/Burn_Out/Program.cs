@@ -64,6 +64,7 @@ builder.Services.AddScoped<AuthenticationStateProvider, PersistingRevalidatingAu
 
 // Custom repositories
 builder.Services.AddScoped<IHallRepository, HallRepository>();
+builder.Services.AddScoped<Application.Services.HallReservationService>();
 
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddHttpClient();
@@ -158,7 +159,7 @@ app.MapGet("/auth/login", async (
         lockoutOnFailure: false);
 
     return result.Succeeded
-        ? Results.Redirect("/")
+        ? Results.Redirect("/userProfile")
         : Results.Redirect("/login?error=1");
 });
 

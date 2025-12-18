@@ -1,24 +1,29 @@
 @page "/userProfile"
+@page "/userProfile/{UserId}"
+
 @using System.ComponentModel.DataAnnotations
 @using Burn_Out.Components.Account
 @using Infrastructure
+@using Infrastructure.Data
 @using Infrastructure.Models
 @using Microsoft.AspNetCore.Authorization
 @using Microsoft.AspNetCore.Identity
 @using Core.Models
+@using Microsoft.EntityFrameworkCore
 
 @attribute [Authorize]
 
+@inject ApplicationDbContext DbContext
 @inject UserManager<ApplicationUser> UserManager
 @inject IdentityUserAccessor UserAccessor
 @inject NavigationManager NavigationManager
 
 
-<PageTitle>Account Information</PageTitle>
+<PageTitle>Informacje konta</PageTitle>
 
 <MudContainer MaxWidth="MaxWidth.Large" Class="mt-4">
     <MudPaper Class="pa-4">
-        <MudText Typo="Typo.h4" GutterBottom="true">Account Information</MudText>
+        <MudText Typo="Typo.h4" GutterBottom="true">Informacje o koncie</MudText>
         
         @if (isLoading)
         {
@@ -35,22 +40,26 @@
                     <MudCard>
                         <MudCardHeader>
                             <CardHeaderContent>
-                                <MudText Typo="Typo.h6">Personal Information</MudText>
+                                <MudText Typo="Typo.h6">Informacje cz³onka</MudText>
                             </CardHeaderContent>
                         </MudCardHeader>
                         <MudCardContent>
                             <MudStack Spacing="3">
                                 <div>
-                                    <MudText Typo="Typo.caption" Color="Color.Secondary">First Name</MudText>
+                                    <MudText Typo="Typo.caption" Color="Color.Secondary">Imiê: </MudText>
                                     <MudText Typo="Typo.body1">@(user.FirstName ?? "Not provided")</MudText>
                                 </div>
                                 <div>
-                                    <MudText Typo="Typo.caption" Color="Color.Secondary">Last Name</MudText>
+                                    <MudText Typo="Typo.caption" Color="Color.Secondary">Nazwisko: </MudText>
                                     <MudText Typo="Typo.body1">@(user.LastName ?? "Not provided")</MudText>
                                 </div>
                                 <div>
-                                    <MudText Typo="Typo.caption" Color="Color.Secondary">Date of Birth</MudText>
+                                    <MudText Typo="Typo.caption" Color="Color.Secondary">Data urodzenia: </MudText>
                                     <MudText Typo="Typo.body1">@(user.DateOfBirth?.ToString("MMMM dd, yyyy") ?? "Not provided")</MudText>
+                                </div>
+                                <div>
+                                    <MudText Typo="Typo.caption" Color="Color.Secondary">Cz³onek od: </MudText>
+                                    <MudText Typo="Typo.body1">@user.CreatedAt.ToString("MMMM dd, yyyy 'at' hh:mm tt")</MudText>
                                 </div>
                             </MudStack>
                         </MudCardContent>
@@ -62,7 +71,7 @@
                     <MudCard>
                         <MudCardHeader>
                             <CardHeaderContent>
-                                <MudText Typo="Typo.h6">Contact Information</MudText>
+                                <MudText Typo="Typo.h6">Kontakt</MudText>
                             </CardHeaderContent>
                         </MudCardHeader>
                         <MudCardContent>
@@ -72,20 +81,16 @@
                                     <MudText Typo="Typo.body1">@user.Email</MudText>
                                     @if (!user.EmailConfirmed)
                                     {
-                                        <MudChip T="string" Size="Size.Small" Color="Color.Warning">Not Confirmed</MudChip>
+                                        <MudChip T="string" Size="Size.Small" Color="Color.Warning">Nie potwierdzony</MudChip>
                                     }
                                 </div>
                                 <div>
-                                    <MudText Typo="Typo.caption" Color="Color.Secondary">Phone Number</MudText>
+                                    <MudText Typo="Typo.caption" Color="Color.Secondary">Numer telefonu</MudText>
                                     <MudText Typo="Typo.body1">@(user.PhoneNumber ?? "Not provided")</MudText>
                                     @if (!string.IsNullOrEmpty(user.PhoneNumber) && !user.PhoneNumberConfirmed)
                                     {
-                                        <MudChip T="string" Size="Size.Small" Color="Color.Warning">Not Confirmed</MudChip>
+                                        <MudChip T="string" Size="Size.Small" Color="Color.Warning">Nie potwierdzony</MudChip>
                                     }
-                                </div>
-                                <div>
-                                    <MudText Typo="Typo.caption" Color="Color.Secondary">Username</MudText>
-                                    <MudText Typo="Typo.body1">@user.UserName</MudText>
                                 </div>
                             </MudStack>
                         </MudCardContent>
@@ -93,56 +98,67 @@
                 </MudItem>
 
                 <MudItem xs="12">
-                    <MudCard>
-                        <MudCardHeader>
-                            <CardHeaderContent>
-                                <MudText Typo="Typo.h6">Account Details</MudText>
-                            </CardHeaderContent>
-                        </MudCardHeader>
-                        <MudCardContent>
-                            <MudStack Row="true" Spacing="6">
-                                <div>
-                                    <MudText Typo="Typo.caption" Color="Color.Secondary">Account Created</MudText>
-                                    <MudText Typo="Typo.body1">@user.CreatedAt.ToString("MMMM dd, yyyy 'at' hh:mm tt")</MudText>
-                                </div>
-                                @if (user.LastModifiedAt.HasValue)
-                                {
-                                    <div>
-                                        <MudText Typo="Typo.caption" Color="Color.Secondary">Last Modified</MudText>
-                                        <MudText Typo="Typo.body1">@user.LastModifiedAt.Value.ToString("MMMM dd, yyyy 'at' hh:mm tt")</MudText>
-                                    </div>
-                                }
-                                <div>
-                                    <MudText Typo="Typo.caption" Color="Color.Secondary">Two-Factor Authentication</MudText>
-                                    <MudText Typo="Typo.body1">
-                                        @if (user.TwoFactorEnabled)
-                                        {
-                                            <MudChip T="string" Size="Size.Small" Color="Color.Success">Enabled</MudChip>
-                                        }
-                                        else
-                                        {
-                                            <MudChip T="string" Size="Size.Small" Color="Color.Default">Disabled</MudChip>
-                                        }
-                                    </MudText>
-                                </div>
-                            </MudStack>
-                        </MudCardContent>
-                    </MudCard>
+                        @if (latestMeasurement != null)
+                        {
+                        <MudCard>
+                            <MudCardHeader>
+                                <CardHeaderContent>
+                                    <MudText Typo="Typo.h6">Najnowszy postêp</MudText>
+                                </CardHeaderContent>
+                            </MudCardHeader>
+                            <MudCardContent>
+                                <MudStack Row="true" Spacing="6">
+                                    <MudGrid>
+                                        <MudItem xs="12" sm="6" md="3">
+                                            <MudText>Martwy ci¹g</MudText>
+                                            <MudText>@latestMeasurement?.MaxDeadLift?.ToString()</MudText>
+                                        </MudItem>
+                                        <MudItem xs="12" sm="6" md="3">
+                                            <MudText>Wyciskanie na ³awce</MudText>
+                                            <MudText>@latestMeasurement?.MaxBenchPress?.ToString()</MudText>
+                                        </MudItem>
+                                        <MudItem xs="12" sm="6" md="3">
+                                            <MudText>Przysiady</MudText>
+                                            <MudText>@latestMeasurement?.MaxSquat?.ToString()</MudText>
+                                        </MudItem>
+                                        <MudItem xs="12" sm="6" md="3">
+                                            <MudText>Szerokoœæ pleców</MudText>
+                                            <MudText>@latestMeasurement?.BackWide?.ToString()</MudText>
+                                        </MudItem>
+                                        <MudItem xs="12" sm="6" md="3">
+                                            <MudText>Obwód bicepsu</MudText>
+                                            <MudText>@latestMeasurement?.BicepsCircumference?.ToString()</MudText>
+                                        </MudItem>
+                                        <MudItem xs="12" sm="6" md="3">
+                                            <MudText>Obwó uda</MudText>
+                                            <MudText>@latestMeasurement?.ThighCircumference?.ToString()</MudText>
+                                        </MudItem>
+                                        <MudItem xs="12" sm="6" md="3">
+                                            <MudText>Obwód klatki piersiowej</MudText>
+                                            <MudText>@latestMeasurement?.ChestCircumference?.ToString()</MudText>
+                                        </MudItem>
+                                        <MudItem xs="12" sm="6" md="3">
+                                            <MudText>Obwód brzucha</MudText>
+                                            <MudText>@latestMeasurement?.BellyCircumference?.ToString()</MudText>
+                                        </MudItem>
+                                    </MudGrid>
+                                </MudStack>
+                            </MudCardContent>
+                        </MudCard>
+                        }
                 </MudItem>
 
                 <MudItem xs="12">
                     <MudStack Row="true" Justify="Justify.SpaceBetween">
-                        <MudButton Variant="Variant.Filled" 
-                                   Color="Color.Primary" 
-                                   StartIcon="@Icons.Material.Filled.Edit"
-                                   Href="/Account/Edit">
-                            Edit Profile
-                        </MudButton>
-                        <MudButton Variant="Variant.Outlined" 
-                                   Color="Color.Default"
-                                   Href="/">
-                            Back to Home
-                        </MudButton>
+                        @if (canEdit)
+                        {
+                            <MudButton Variant="Variant.Filled" 
+                                       Color="Color.Primary" 
+                                       StartIcon="@Icons.Material.Filled.Edit"
+                                       Href="@($"/Account/Edit/{user?.Id}")">
+                                Edytuj profil
+                            </MudButton>
+                        }
                     </MudStack>
                 </MudItem>
             </MudGrid>
@@ -151,17 +167,43 @@
 </MudContainer>
 
 @code {
+    private Measurement? latestMeasurement;
     private ApplicationUser? user;
     private bool isLoading = true;
+    private bool canEdit = false;
+
+    [Parameter]
+    public string? UserId { get; set; }
 
     [CascadingParameter]
     private HttpContext HttpContext { get; set; } = default!;
 
     protected override async Task OnInitializedAsync()
     {
+        isLoading = true;
         try
         {
-            user = await UserAccessor.GetRequiredUserAsync();
+            var currentUser = await UserAccessor.GetRequiredUserAsync();
+            var currentUserRoles = await UserManager.GetRolesAsync(currentUser);
+
+            if (!string.IsNullOrEmpty(UserId) && (currentUserRoles.Contains("Employee") || currentUserRoles.Contains("Admin")))
+            {
+                user = await UserManager.FindByIdAsync(UserId);
+                canEdit = true;
+            }
+            else
+            {
+                user = currentUser;
+                canEdit = true; // user can always edit their own profile
+            }
+
+            if (user != null)
+            {
+                latestMeasurement = await DbContext.Measurements
+                    .Where(m => m.UserId == user.Id)
+                    .OrderByDescending(m => m.Date)
+                    .FirstOrDefaultAsync();
+            }
         }
         catch (Exception)
         {

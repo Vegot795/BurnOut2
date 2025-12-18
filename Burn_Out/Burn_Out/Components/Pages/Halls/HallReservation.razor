@@ -1,0 +1,57 @@
+﻿@page "/hall-reservation"
+@using Core.Models
+@inject Application.Services.HallReservationService HallReservationService
+
+<h3>Reserve a Hall</h3>
+
+<EditForm Model="@reservationModel" OnValidSubmit="HandleReservation">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+
+    <div class="mb-3">
+        <label>Hall ID:</label>
+        <InputNumber @bind-Value="reservationModel.HallId" class="form-control" />
+    </div>
+    <div class="mb-3">
+        <label>Start Time:</label>
+        <InputDate @bind-Value="reservationModel.StartTime" class="form-control" />
+    </div>
+    <div class="mb-3">
+        <label>End Time:</label>
+        <InputDate @bind-Value="reservationModel.EndTime" class="form-control" />
+    </div>
+    <div class="mb-3">
+        <label>User ID:</label>
+        <InputText @bind-Value="reservationModel.UserId" class="form-control" />
+    </div>
+    <button type="submit" class="btn btn-primary">Reserve</button>
+</EditForm>
+
+@if (!string.IsNullOrEmpty(message))
+{
+    <div class="alert alert-info mt-3">@message</div>
+}
+
+@code {
+    private ReservationModel reservationModel = new();
+    private string message;
+
+    private async Task HandleReservation()
+    {
+        var success = await HallReservationService.ReserveHallAsync(
+            reservationModel.HallId,
+            reservationModel.UserId,
+            reservationModel.StartTime,
+            reservationModel.EndTime);
+
+        message = success ? "Reservation successful!" : "Reservation failed. The hall may already be reserved for this time.";
+    }
+
+    public class ReservationModel
+    {
+        public int HallId { get; set; }
+        public string UserId { get; set; }
+        public DateTime StartTime { get; set; } = DateTime.Now;
+        public DateTime EndTime { get; set; } = DateTime.Now.AddHours(1);
+    }
+}

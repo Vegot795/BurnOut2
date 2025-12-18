@@ -1,5 +1,4 @@
 using Core.Models;
-using Infrastructure.Data;
 using Infrastructure.Models;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
@@ -13,5 +12,6 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
     }
     public DbSet<HallModel> Halls { get; set; }
     public DbSet<Measurement> Measurements { get; set; }
+    public DbSet<HallReservation> HallReservations { get; set; }
 
-}
+    }
