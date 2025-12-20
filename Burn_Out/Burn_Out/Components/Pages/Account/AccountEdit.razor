@@ -1,4 +1,5 @@
 @page "/Account/Edit"
+@page "/Account/Edit/{UserId}"
 @using System.ComponentModel.DataAnnotations
 @using Burn_Out.Components.Account
 @using Infrastructure
@@ -13,8 +14,6 @@
 @inject NavigationManager NavigationManager
 @inject ISnackbar Snackbar
 @inject IHttpContextAccessor HttpContextAccessor
-
-
 
 <PageTitle>Edit Account</PageTitle>
 
@@ -105,7 +104,7 @@
                             </MudButton>
                             <MudButton Variant="Variant.Outlined" 
                                        Color="Color.Default"
-                                       Href="/Account/Display"
+                                       Href="@cancelHref"
                                        Disabled="isSaving">
                                 Cancel
                             </MudButton>
@@ -135,58 +134,87 @@
 </style>
 
 @code {
-private ApplicationUser? user;
-private bool isLoading = true;
-private bool isSaving = false;
+    [Parameter] public string? UserId { get; set; }
 
-[CascadingParameter]
-private HttpContext HttpContext { get; set; } = default!;
+    private ApplicationUser? user;
+    private bool isLoading = true;
+    private bool isSaving = false;
+    private bool isEditingOther = false;
+    private IList<string> currentUserRoles = Array.Empty<string>();
+    private string cancelHref = "/Account/Display";
 
-[SupplyParameterFromForm]
-private InputModel? Input { get; set; }
+    [CascadingParameter]
+    private HttpContext HttpContext { get; set; } = default!;
 
-protected override async Task OnInitializedAsync()
-{
-    try
+    [SupplyParameterFromForm]
+    private InputModel? Input { get; set; }
+
+    protected override async Task OnInitializedAsync()
     {
-        user = await UserAccessor.GetRequiredUserAsync();
-        
-        // Initialize Input if null and populate on GET requests
-        if (user != null)
+        try
         {
-            Input = new InputModel
+            // Get currently authenticated user and roles
+            var currentUser = await UserAccessor.GetRequiredUserAsync();
+            currentUserRoles = (await UserManager.GetRolesAsync(currentUser)).ToList();
+
+            // If route contains UserId and current user is staff, load that user for editing
+            if (!string.IsNullOrEmpty(UserId) && (currentUserRoles.Contains("Employee") || currentUserRoles.Contains("Admin")))
+            {
+                user = await UserManager.FindByIdAsync(UserId);
+                isEditingOther = true;
+            }
+            else
+            {
+                // edit own profile
+                user = currentUser;
+                isEditingOther = false;
+            }
+
+            if (user == null)
+            {
+                Snackbar.Add("Error loading user data", Severity.Error);
+                Input = new InputModel();
+                return;
+            }
+
+            // populate Input model for the loaded user
+            Input ??= new InputModel
             {
                 FirstName = user.FirstName,
                 LastName = user.LastName,
                 DateOfBirth = user.DateOfBirth,
                 PhoneNumber = user.PhoneNumber
             };
+
+            // set cancel link back to the appropriate profile page
+            cancelHref = $"/user-profile/{user.Id}";
         }
-        else if (Input == null)
+        catch (Exception)
         {
-            // POST but Input is null - initialize with empty model
-            Input = new InputModel();
+            user = null;
+            Snackbar.Add("Error loading user data", Severity.Error);
+        }
+        finally
+        {
+            isLoading = false;
         }
     }
-    catch (Exception)
-    {
-        user = null;
-        Snackbar.Add("Error loading user data", Severity.Error);
-    }
-    finally
-    {
-        isLoading = false;
-    }
-}
 
     private async Task OnValidSubmitAsync()
     {
         if (user == null || Input == null) return;
 
+        // If editing another user, ensure current user has permission
+        if (isEditingOther && !(currentUserRoles.Contains("Employee") || currentUserRoles.Contains("Admin")))
+        {
+            Snackbar.Add("Unauthorized to edit this account.", Severity.Error);
+            return;
+        }
+
         isSaving = true;
         try
         {
-            // Update user properties
+            // Update target user properties
             user.FirstName = Input.FirstName;
             user.LastName = Input.LastName;
             user.DateOfBirth = Input.DateOfBirth;
@@ -198,7 +226,7 @@ protected override async Task OnInitializedAsync()
             if (result.Succeeded)
             {
                 Snackbar.Add("Profile updated successfully!", Severity.Success);
-                NavigationManager.NavigateTo("/Account/Display");
+                NavigationManager.NavigateTo($"/user-profile/{user.Id}");
             }
             else
             {

@@ -1,4 +1,4 @@
-﻿@page "/user/register"
+﻿@page "/admin/register"
 
 @inject UserManager<ApplicationUser> UserManager
 @inject RoleManager<IdentityRole> RoleManager
@@ -24,13 +24,19 @@
 	}
 
 	<MudForm @ref="form">
-		<MudTextField @bind-value="Email" Label="Email" Required="true"/>
-		<MudTextField @bind-Value="Password" Label="Hasło" Required="true"/>
-		<MudTextField @bind-value="ConfirmPassword" Label="Potwierdź hasło" Required="true"/>
+		<MudTextField @bind-value="Email" Label="Email" Required="true" />
+		<MudTextField @bind-Value="Password" Label="Hasło" Required="true" />
+		<MudTextField @bind-value="ConfirmPassword" Label="Potwierdź hasło" Required="true" />
+
+		<MudRadioGroup T="UserRoles" @bind-SelectedOption="SelectedRole" Row="true" Label="Wybierz rolę:">
+			<MudRadio T="UserRoles" Option="UserRoles.Client" Color="Color.Primary" Label="Klient">@UserRoles.Client.ToString()</MudRadio>
+			<MudRadio T="UserRoles" Option="UserRoles.Employee" Color="Color.Primary" Label="Pracownik">@UserRoles.Employee.ToString()</MudRadio>
+			<MudRadio T="UserRoles" Option="UserRoles.Admin" Color="Color.Primary" Label="Administrator">@UserRoles.Admin.ToString()</MudRadio>
+		</MudRadioGroup>
 
 		<MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="RegisterUser" Disabled="@isSubmitting">Stwórz konto</MudButton>
 
-		<MudText Color="Color.Error" Typo=Typo.body2>@errorMessage</MudText>	
+		<MudText Color="Color.Error" Typo=Typo.body2>@errorMessage</MudText>
 	</MudForm>
 </MudPaper>
 
@@ -39,6 +45,7 @@
 	private string Email = string.Empty;
 	private string Password = string.Empty;
 	private string ConfirmPassword = string.Empty;
+	private UserRoles SelectedRole = UserRoles.Client;
 	private bool isSubmitting = false;
 	private string errorMessage = string.Empty;
 
@@ -76,16 +83,14 @@
 
 		if (!result.Succeeded)
 		{
-			// Do not attempt to assign role when user creation failed
+			// Do not attempt to assign role if user creation failed
 			errorMessage = string.Join(", ", result.Errors.Select(e => e.Description));
 			isSubmitting = false;
 			return;
 		}
 
-		// Enforce Client role for public registration
-		var roleName = UserRoles.Client.ToString();
-
 		// Ensure role exists, create if missing
+		var roleName = SelectedRole.ToString();
 		if (!await RoleManager.RoleExistsAsync(roleName))
 		{
 			var createRoleResult = await RoleManager.CreateAsync(new IdentityRole(roleName));
@@ -99,10 +104,11 @@
 			}
 		}
 
-		// Assign Client role only
+		// Assign role
 		var roleResult = await UserManager.AddToRoleAsync(user, roleName);
 		if (!roleResult.Succeeded)
 		{
+			// Roll back user creation to avoid inconsistent state
 			await UserManager.DeleteAsync(user);
 			errorMessage = "Nie udało się przypisać roli: " + string.Join(", ", roleResult.Errors.Select(e => e.Description));
 			isSubmitting = false;
@@ -110,6 +116,5 @@
 		}
 
 		Snackbar.Add("Konto zostało utworzone pomyślnie");
-		NavigationManager.NavigateTo("/login");
 	}
 }

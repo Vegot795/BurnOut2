@@ -1,56 +1,175 @@
-﻿@page "/hall-reservation"
+﻿@page "/hall-reservation/{hallId:int}"
+
+@using Burn_Out.Components.Account
 @using Core.Models
+@using Infrastructure.Data
+@using Infrastructure.Models
+@using Microsoft.AspNetCore.Identity
+@using Microsoft.AspNetCore.Components
+@using Microsoft.AspNetCore.Components.Forms
+@using MudBlazor
+
 @inject Application.Services.HallReservationService HallReservationService
+@inject UserManager<ApplicationUser> UserManager
+@inject IdentityUserAccessor UserAccessor
+@inject NavigationManager NavigationManager
+@inject ApplicationDbContext DbContext
 
 <h3>Reserve a Hall</h3>
 
-<EditForm Model="@reservationModel" OnValidSubmit="HandleReservation">
-    <DataAnnotationsValidator />
-    <ValidationSummary />
-
-    <div class="mb-3">
-        <label>Hall ID:</label>
-        <InputNumber @bind-Value="reservationModel.HallId" class="form-control" />
-    </div>
-    <div class="mb-3">
-        <label>Start Time:</label>
-        <InputDate @bind-Value="reservationModel.StartTime" class="form-control" />
-    </div>
-    <div class="mb-3">
-        <label>End Time:</label>
-        <InputDate @bind-Value="reservationModel.EndTime" class="form-control" />
-    </div>
-    <div class="mb-3">
-        <label>User ID:</label>
-        <InputText @bind-Value="reservationModel.UserId" class="form-control" />
-    </div>
-    <button type="submit" class="btn btn-primary">Reserve</button>
-</EditForm>
-
-@if (!string.IsNullOrEmpty(message))
+@if (_loading)
 {
-    <div class="alert alert-info mt-3">@message</div>
+    <p>Loading...</p>
+}
+else
+{
+    <EditForm Model="@reservationModel" OnValidSubmit="HandleReservation">
+        <DataAnnotationsValidator />
+        <ValidationSummary />
+
+        <MudItem class="mb-3">
+            <MudText>Hall:</MudText>
+            @if (currentHall is not null)
+            {
+                <MudItem class="form-control-plaintext">@currentHall.HallName (ID: @reservationModel.HallId)</MudItem>
+            }
+            else
+            {
+                <MudItem class="form-control-plaintext">ID: @reservationModel.HallId</MudItem>
+            }
+        </MudItem>
+
+        <MudItem class="mb-3">
+            <MudText>Start (date & time):</MudText>
+            <input type="datetime-local" class="form-control"
+                   @bind="reservationModel.StartTime"
+                   step="900" /> @* step=900 => 15 minute increments; adjust as needed *@
+        </MudItem>
+
+        <MudItem class="mb-3">
+            <MudText>End (date & time):</MudText>
+            <input type="datetime-local" class="form-control"
+                   @bind="reservationModel.EndTime"
+                   step="900" />
+        </MudItem>
+
+        <MudItem class="mb-3">
+            <MudText>User:</MudText>
+            <div class="form-control-plaintext">@displayUserText</div>
+        </MudItem>
+
+        <button type="submit" class="btn btn-primary" disabled="@submitDisabled">Reserve</button>
+    </EditForm>
+
+    @if (!string.IsNullOrEmpty(message))
+    {
+        <div class="alert alert-info mt-3">@message</div>
+    }
 }
 
 @code {
+    [Parameter]
+    public int hallId { get; set; }
+
+    [CascadingParameter]
+    private HttpContext HttpContext { get; set; } = default!;
+
     private ReservationModel reservationModel = new();
-    private string message;
+    private string? message;
+    private bool _loading = true;
+    private ApplicationUser? user;
+    private HallModel? currentHall;
+    private string displayUserText = string.Empty;
+    private bool submitDisabled = false;
+
+    protected override async Task OnInitializedAsync()
+    {
+        _loading = true;
+        try
+        {
+            // set hall id from route
+            reservationModel.HallId = hallId;
+
+            // load hall info for display
+            currentHall = await DbContext.Halls.FindAsync(hallId);
+            if (currentHall is null)
+            {
+                message = "Sala nie istnieje.";
+                submitDisabled = true;
+                return;
+            }
+
+            // get current authenticated user (throws if not authenticated)
+            user = await UserAccessor.GetRequiredUserAsync();
+            reservationModel.UserId = user.Id;
+            displayUserText = $"{user.UserName} ({user.Email})";
+
+            // default times (rounded to nearest minute)
+            reservationModel.StartTime = DateTime.Now;
+            reservationModel.EndTime = DateTime.Now.AddHours(1);
+        }
+        catch (Exception)
+        {
+            // if user is not authenticated or other error, redirect to login
+            NavigationManager.NavigateTo("/login");
+            return;
+        }
+        finally
+        {
+            _loading = false;
+        }
+    }
 
     private async Task HandleReservation()
     {
-        var success = await HallReservationService.ReserveHallAsync(
-            reservationModel.HallId,
-            reservationModel.UserId,
-            reservationModel.StartTime,
-            reservationModel.EndTime);
+        // basic validation: start < end
+        if (reservationModel.EndTime <= reservationModel.StartTime)
+        {
+            message = "End time must be after start time.";
+            return;
+        }
 
-        message = success ? "Reservation successful!" : "Reservation failed. The hall may already be reserved for this time.";
+        // optionally enforce a maximum duration (example: 24 hours)
+        var maxHours = 24;
+        if ((reservationModel.EndTime - reservationModel.StartTime).TotalHours > maxHours)
+        {
+            message = $"Reservation cannot be longer than {maxHours} hours.";
+            return;
+        }
+
+        submitDisabled = true;
+
+        try
+        {
+            var success = await HallReservationService.ReserveHallAsync(
+                reservationModel.HallId,
+                reservationModel.UserId,
+                reservationModel.StartTime,
+                reservationModel.EndTime);
+
+            if (success)
+            {
+                message = "Reservation successful!";
+                NavigationManager.NavigateTo("/hall-list");
+            }
+            else
+            {
+                message = "Reservation failed. The hall may already be reserved for this time.";
+                submitDisabled = false;
+            }
+            
+        }
+        catch (Exception ex)
+        {
+            message = $"Reservation error: {ex.Message}";
+            submitDisabled = false;
+        }
     }
 
     public class ReservationModel
     {
         public int HallId { get; set; }
-        public string UserId { get; set; }
+        public string UserId { get; set; } = string.Empty;
         public DateTime StartTime { get; set; } = DateTime.Now;
         public DateTime EndTime { get; set; } = DateTime.Now.AddHours(1);
     }

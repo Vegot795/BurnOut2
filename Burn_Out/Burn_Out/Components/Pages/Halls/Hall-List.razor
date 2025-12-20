@@ -16,8 +16,6 @@
 
 <h3>Lista Sal</h3>
 
-
-
 <MudPaper>
     <MudGrid>
         <MudTable Items="@hallList" Hover="true" Loading="@_loading" >
@@ -28,10 +26,11 @@
                 <MudTh>Akcje</MudTh>
             </HeaderContent>
             <RowTemplate>
+                <MudTd DataLabel="Nazwa">@context.HallName</MudTd>
                 <MudTd DataLabel="Pojemność">@context.Capacity</MudTd>
                 <MudTd DataLabel="Dostępność">@context.IsAvailable</MudTd>
                 <MudTd DataLabel="Dostępność">
-                    <MudButton Variant="Variant.Filled" OnClick="@(() => NavigationManager.NavigateTo("/hall-reservation"))">Zarezerwuj</MudButton>
+                    <MudButton Variant="Variant.Filled" Disabled="!context.IsAvailable" OnClick="@(() => ReserveHall(context.Id))">Zarezerwuj</MudButton>
                 </MudTd>
             </RowTemplate>
         </MudTable>
@@ -68,5 +67,11 @@
             _loading = false;
             StateHasChanged();
         }
+    }
+
+    private void ReserveHall(int hallId)
+    {
+        // navigate to reservation page with hall id in route
+        NavigationManager.NavigateTo($"/hall-reservation/{hallId}");
     }
 }

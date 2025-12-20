@@ -159,7 +159,7 @@ app.MapGet("/auth/login", async (
         lockoutOnFailure: false);
 
     return result.Succeeded
-        ? Results.Redirect("/userProfile")
+        ? Results.Redirect("/user-profile")
         : Results.Redirect("/login?error=1");
 });
 
