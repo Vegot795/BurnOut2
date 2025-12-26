@@ -1,0 +1,151 @@
+﻿@page "/Termins/Edit"
+
+@using Core.Models
+@using Microsoft.EntityFrameworkCore
+@using Infrastructure.Data
+@using System.ComponentModel.DataAnnotations
+
+@inject ISnackbar Snackbar
+@inject ApplicationDbContext DbContext
+
+<MudPaper>
+    <MudGrid>
+        <MudTable Items="@Termins">
+            <HeaderContent>
+                <MudTh>Początek</MudTh>
+                <MudTh>Koniec</MudTh>
+                <MudTh>Dostępny</MudTh>
+                <MudTh></MudTh>
+            </HeaderContent>
+            <RowTemplate Context="termin">
+                <MudTd>@termin.StartTime</MudTd>
+                <MudTd>@termin.EndTime</MudTd>
+                <MudTd>@(termin.IsReserved ? "Nie" : "Tak")</MudTd>
+                <MudTd>
+                    <MudButton Variant="Variant.Filled">Usuń</MudButton>
+                </MudTd>
+            </RowTemplate>
+        </MudTable>
+        <MudItem>
+            <MudText>Dodaj nowy termin:</MudText>
+            <MudItem>
+                <MudText>Data</MudText>
+                <input @bind="SelectedDate" type="date" class="form-control" />
+            </MudItem>
+            <MudItem>
+                <MudText>Godzina Początkowa</MudText>
+                <input @bind="Input.StartTime" type="time" class="form-control" step="900" />
+            </MudItem>
+            <MudItem>
+                <MudText>Godzina Końcowa</MudText>
+                <input @bind="Input.EndTime" type="time" class="form-control" step="900" />
+            </MudItem>
+
+            <MudButton Disabled="@_saving" OnClick="@AddTerminAsync">Dodaj</MudButton>
+        </MudItem>
+
+    </MudGrid>
+</MudPaper>
+
+@code {
+    private List<Termins> Termins = new List<Termins>();
+
+    private InputModel Input = new InputModel();
+
+    private DateTime SelectedDate = DateTime.Today; // Add this line
+
+    private bool _loading = true;
+    private bool _saving = false;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadTermins();
+    }
+
+    private async Task LoadTermins()
+    {
+        _loading = true;
+        try
+        {
+            Termins = await DbContext.Termins
+                        .Where(t => t.Date == SelectedDate)
+                        .OrderBy(t => t.StartTime)
+                        .ToListAsync();
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add("Wystąpił błąd podczas ładowania terminów: " + ex.Message);
+        }
+        finally
+        {
+            _loading = false;
+        }
+    }
+
+    private async Task AddTerminAsync()
+    {
+        if (Input == null)
+        {
+            Snackbar.Add("Wprowadź godziny początkową i końcową.", Severity.Error);
+            return;
+        }
+
+        // Basic validation
+        if (Input.EndTime <= Input.StartTime)
+        {
+            Snackbar.Add("Godzina końcowa musi być po godzinie początkowej.", Severity.Error);
+            return;
+        }
+
+        _saving = true;
+        try
+        {
+            // Create new Termins entity
+            var newTermin = new Termins
+            {
+                Date = SelectedDate,
+                StartTime = SelectedDate.Date.Add(Input.StartTime.ToTimeSpan()),
+                EndTime = SelectedDate.Date.Add(Input.EndTime.ToTimeSpan()),
+                IsReserved = false // or set as needed
+            };
+
+            DbContext.Termins.Add(newTermin);
+            await DbContext.SaveChangesAsync();
+
+            Snackbar.Add("Termin dodany!", Severity.Success);
+
+            // Refresh list
+            await LoadTermins();
+
+            // Optionally reset input
+            Input.StartTime = default;
+            Input.EndTime = default;
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add("Błąd dodawania terminu: " + ex.Message, Severity.Error);
+        }
+        finally
+        {
+            _saving = false;
+        }
+    }
+
+    private async Task DeleteTermin(int terminId)
+    {
+
+    }
+
+    private sealed class InputModel
+    {
+        [Required(ErrorMessage = "Data początkowa jest wymagana.")]
+        [Display(Name = "Data początkowa")]
+        public TimeOnly StartTime { get; set; }
+
+        [Required(ErrorMessage = "Data końcowa jest wymagana.")]
+        [Display(Name = "Data końcowa")]
+        public TimeOnly EndTime { get; set; }
+
+    }
+
+}
