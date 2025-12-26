@@ -1,5 +1,6 @@
 ﻿@page "/user-list"
 
+@using Burn_Out.Components.Dialogs
 @using Core.Interfaces
 @using Infrastructure.Models
 @using Infrastructure.Data
@@ -11,9 +12,12 @@
 @inject IHallRepository HallRepository
 @inject ApplicationDbContext DbContext
 @inject ISnackbar SnackBar
+@inject IDialogService DialogService
 
 <h3>MemberList</h3>
 
+
+<MudDialogProvider />
 <MudPaper>
 	<MudGrid>
 		<MudTabs Elevation="2" Rounded="true" ApplyEffectsToContainer="true" Centered="false">
@@ -40,6 +44,7 @@
 							<MudButton Variant="Variant.Filled" Color="Color.Primary" Size="Size.Small" Href="@($"/user-profile/{context.Id}")">
 								Pokaż profil
 							</MudButton>
+							<MudButton Variant="Variant.Filled" Color="Color.Primary" Size="Size.Small" OnClick="@(() => ShowDeleteDialog(context, dialogOptions))">Usuń użytkownika</MudButton>
 						</MudTd>
 					</RowTemplate>
 				</MudTable>
@@ -67,6 +72,7 @@
 							<MudButton Variant="Variant.Filled" Color="Color.Primary" Size="Size.Small" Href="@($"/userProfile/{context.Id}")">
 								Pokaż profil
 							</MudButton>
+							<MudButton Variant="Variant.Filled" Color="Color.Primary" Size="Size.Small" OnClick="@(() => ShowDeleteDialog(context, dialogOptions))">Usuń użytkownika</MudButton>
 						</MudTd>
 					</RowTemplate>
 				</MudTable>
@@ -76,9 +82,12 @@
 </MudPaper>
 
 @code {
+	private readonly DialogOptions dialogOptions = new() { Position = DialogPosition.Center };
+
 	private bool _loading = false;
 	List<ApplicationUser> memberList = new List<ApplicationUser>();
 	List<ApplicationUser> employeeList = new List<ApplicationUser>();
+	private ApplicationUser? _userToDelete;
 
 	protected override async Task OnInitializedAsync()
 	{
@@ -127,4 +136,42 @@
 			_loading = false;
 		}
 	}
+
+	private async Task ShowDeleteDialog(ApplicationUser user, DialogOptions dialogOptions)
+	{
+		_userToDelete = user;
+		var parameters = new DialogParameters
+		{
+			{ "User", user }
+		};
+		var options = new DialogOptions { CloseOnEscapeKey = true };
+		var dialog = DialogService.Show<DeleteUserConfirm>("Potwierdź usunięcie", parameters, options);
+		var result = await dialog.Result;
+		if (!result.Cancelled)
+		{
+			await DeleteUserAsync(user);
+		}
+	}
+
+	private async Task DeleteUserAsync(ApplicationUser user)
+	{
+		try
+		{
+			var result = await UserManager.DeleteAsync(user);
+			if (result.Succeeded)
+			{
+				memberList.Remove(user);
+				SnackBar.Add("Użytkownik został usunięty.", Severity.Success);
+			}
+			else
+			{
+				SnackBar.Add("Błąd podczas usuwania użytkownika.", Severity.Error);
+			}
+		}
+		catch (Exception ex)
+		{
+			SnackBar.Add($"Error deleting user: {ex.Message}", Severity.Error);
+		}
+	}
 }
+

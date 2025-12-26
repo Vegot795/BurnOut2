@@ -1,0 +1,31 @@
+﻿@using Infrastructure.Models
+@using Microsoft.AspNetCore.Components
+@using MudBlazor
+
+<MudDialog>
+    <DialogContent>
+        <MudText Typo="Typo.h6">Czy na pewno chcesz usunąć użytkownika <b>@User?.FirstName @User?.Email</b>?</MudText>
+    </DialogContent>
+    <DialogActions>
+        <MudButton Color="Color.Error" OnClick="Confirm">Usuń</MudButton>
+        <MudButton OnClick="Cancel">Anuluj</MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+    [CascadingParameter] 
+    MudDialogInstance MudDialog { get; set; } = default!;
+
+    [Parameter]
+    public ApplicationUser? User { get; set; }
+
+    private void Confirm()
+    {
+        MudDialog.Close(DialogResult.Ok(true));
+    }
+
+    private void Cancel()
+    {
+        MudDialog.Cancel();
+    }
+}
