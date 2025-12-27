@@ -15,8 +15,6 @@
 @inject NavigationManager NavigationManager
 @inject ApplicationDbContext DbContext
 
-<h3>Reserve a Hall</h3>
-
 @if (_loading)
 {
     <p>Loading...</p>
@@ -126,13 +124,11 @@ else
             reservationModel.UserId = user.Id;
             displayUserText = $"{user.UserName} ({user.Email})";
 
-            // default times (rounded to nearest minute)
             reservationModel.StartTime = DateTime.Now;
             reservationModel.EndTime = DateTime.Now.AddHours(1);
         }
         catch (Exception)
         {
-            // if user is not authenticated or other error, redirect to login
             NavigationManager.NavigateTo("/login");
             return;
         }
@@ -144,7 +140,7 @@ else
 
     private async Task HandleReservation()
     {
-        // basic validation: start < end
+
         if (reservationModel.EndTime <= reservationModel.StartTime)
         {
             message = "End time must be after start time.";
@@ -188,9 +184,15 @@ else
         }
     }
 
-    private async Task GoToTerminsEdit()
+    private async Task CancelReservation(int reservationId)
     {
-       NavigationManager.NavigateTo(@"/Termins/Edit");
+        var reservation = await DbContext.HallReservations.FindAsync(reservationId);
+        if (reservation != null)
+        {
+            DbContext.HallReservations.Remove(reservation);
+            await DbContext.SaveChangesAsync();
+
+        }
     }
 
     public class ReservationModel
