@@ -61,9 +61,6 @@ builder.Services.AddScoped<AuthenticationStateProvider, PersistingRevalidatingAu
 builder.Services.AddScoped<IHallRepository, HallRepository>();
 builder.Services.AddScoped<Application.Services.HallReservationService>();
 
-// Register termins repository implementation for DI
-builder.Services.AddScoped<ITerminsRepository, TerminsReposiory>();
-
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddHttpClient();
 
