@@ -52,19 +52,17 @@ builder.Services.AddAuthorization(options =>
 builder.Services.AddCascadingAuthenticationState();
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
-// Configure authentication cookies
-
-// Add authentication/authorization state for Blazor
+// Configure authentication/authorization state for Blazor
 builder.Services.AddScoped<IdentityUserAccessor>();
 builder.Services.AddScoped<IdentityRedirectManager>();
 builder.Services.AddScoped<AuthenticationStateProvider, PersistingRevalidatingAuthenticationStateProvider>();
 
-
-// Add authentication for WebAssembly
-
-// Custom repositories
+// Custom repositories / services
 builder.Services.AddScoped<IHallRepository, HallRepository>();
 builder.Services.AddScoped<Application.Services.HallReservationService>();
+
+// Register termins repository implementation for DI
+builder.Services.AddScoped<ITerminsRepository, TerminsReposiory>();
 
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddHttpClient();
@@ -77,8 +75,6 @@ builder.Services.AddHttpClient("LocalApi", client =>
     client.BaseAddress = new Uri("https://localhost:5230");
 });
 
-
-
 // Add a default HttpClient for general use
 builder.Services.AddScoped(sp =>
     new HttpClient
@@ -87,9 +83,6 @@ builder.Services.AddScoped(sp =>
     });
 
 builder.Services.Configure<CircuitOptions>(options => { options.DetailedErrors = true; });
-
-
-
 
 var app = builder.Build();
 
@@ -111,7 +104,6 @@ app.MapGet("/api/auth/check", async (
 
     return Results.Json(new { isAuthenticated = false });
 });
-
 
 using (var scope = app.Services.CreateScope())
 {
@@ -140,7 +132,6 @@ app.MapRazorComponents<App>()
     .AddInteractiveServerRenderMode()
     .AddInteractiveWebAssemblyRenderMode()
     .AddAdditionalAssemblies(typeof(Burn_Out.Client._Imports).Assembly);
-
 
 app.MapGet("/auth/login", async (
     string email,
@@ -179,21 +170,14 @@ app.MapGet("/auth/signin", async (
         : Results.Redirect("/login?error=1");
 });
 
-
 app.MapPost("/api/auth/logout", async (
     SignInManager<ApplicationUser> signInManager,
     HttpContext context) =>
 {
     await signInManager.SignOutAsync();
     return Results.Redirect("/login");
-    });
+});
 
-
-
-
-// Add additional endpoints required by the Identity /Account Razor components.
 app.MapAdditionalIdentityEndpoints();
 
 app.Run();
-
-// Login model for API

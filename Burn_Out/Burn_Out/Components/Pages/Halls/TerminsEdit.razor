@@ -1,58 +1,65 @@
 ﻿@page "/Termins/Edit"
 
+@using Application.Services
 @using Core.Models
+@using Infrastructure.Repositories
 @using Microsoft.EntityFrameworkCore
 @using Infrastructure.Data
 @using System.ComponentModel.DataAnnotations
+@using Core.Interfaces
 
 @inject ISnackbar Snackbar
 @inject ApplicationDbContext DbContext
+@inject ITerminsRepository TerminsRepo
 
-<MudPaper>
-    <MudGrid>
-        <MudTable Items="@Termins">
-            <HeaderContent>
-                <MudTh>Początek</MudTh>
-                <MudTh>Koniec</MudTh>
-                <MudTh>Dostępny</MudTh>
-                <MudTh></MudTh>
-            </HeaderContent>
-            <RowTemplate Context="termin">
-                <MudTd>@termin.StartTime</MudTd>
-                <MudTd>@termin.EndTime</MudTd>
-                <MudTd>@(termin.IsReserved ? "Nie" : "Tak")</MudTd>
-                <MudTd>
-                    <MudButton Variant="Variant.Filled">Usuń</MudButton>
-                </MudTd>
-            </RowTemplate>
-        </MudTable>
-        <MudItem>
-            <MudText>Dodaj nowy termin:</MudText>
-            <MudItem>
-                <MudText>Data</MudText>
-                <input @bind="SelectedDate" type="date" class="form-control" />
-            </MudItem>
-            <MudItem>
-                <MudText>Godzina Początkowa</MudText>
-                <input @bind="Input.StartTime" type="time" class="form-control" step="900" />
-            </MudItem>
-            <MudItem>
-                <MudText>Godzina Końcowa</MudText>
-                <input @bind="Input.EndTime" type="time" class="form-control" step="900" />
-            </MudItem>
+<AuthorizeView Roles="Employee,Admin">
+    <Authorized>
+        <MudPaper>
+            <MudGrid>
+                <MudTable Items="@Termins">
+                    <HeaderContent>
+                        <MudTh>Początek</MudTh>
+                        <MudTh>Koniec</MudTh>
+                        <MudTh>Dostępny</MudTh>
+                        <MudTh></MudTh>
+                    </HeaderContent>
+                    <RowTemplate Context="termin">
+                        <MudTd>@termin.StartTime</MudTd>
+                        <MudTd>@termin.EndTime</MudTd>
+                        <MudTd>@(termin.IsReserved ? "Nie" : "Tak")</MudTd>
+                        <MudTd>
+                            <MudButton Variant="Variant.Filled" OnClick="() => DeleteTermin(termin.Id)">Usuń</MudButton>
+                        </MudTd>
+                    </RowTemplate>
+                </MudTable>
+                <MudItem>
+                    <MudItem>
+                        <MudText>Godzina Początkowa</MudText>
+                        <input @bind="Input.StartTime" type="time" class="form-control" step="900" />
+                    </MudItem>
+                    <MudItem>
+                        <MudText>Godzina Końcowa</MudText>
+                        <input @bind="Input.EndTime" type="time" class="form-control" step="900" />
+                    </MudItem>
 
-            <MudButton Disabled="@_saving" OnClick="@AddTerminAsync">Dodaj</MudButton>
-        </MudItem>
-
-    </MudGrid>
-</MudPaper>
+                    <MudButton Disabled="@_saving" OnClick="@AddTerminAsync">Dodaj</MudButton>
+                </MudItem>
+            </MudGrid>
+        </MudPaper>
+    </Authorized>
+    <NotAuthorized>
+        <MudPaper Class="pa-4">
+            <MudText>Brak uprawnień.</MudText>
+        </MudPaper>
+    </NotAuthorized>
+</AuthorizeView>
 
 @code {
-    private List<Termins> Termins = new List<Termins>();
+    private List<TerminsModel> Termins = new List<TerminsModel>();
 
     private InputModel Input = new InputModel();
 
-    private DateTime SelectedDate = DateTime.Today; // Add this line
+    private DateOnly SelectedDate = DateOnly.FromDateTime(DateTime.Today);
 
     private bool _loading = true;
     private bool _saving = false;
@@ -90,7 +97,6 @@
             return;
         }
 
-        // Basic validation
         if (Input.EndTime <= Input.StartTime)
         {
             Snackbar.Add("Godzina końcowa musi być po godzinie początkowej.", Severity.Error);
@@ -100,21 +106,18 @@
         _saving = true;
         try
         {
-            // Create new Termins entity
-            var newTermin = new Termins
+            var newTermin = new TerminsModel
             {
                 Date = SelectedDate,
-                StartTime = SelectedDate.Date.Add(Input.StartTime.ToTimeSpan()),
-                EndTime = SelectedDate.Date.Add(Input.EndTime.ToTimeSpan()),
-                IsReserved = false // or set as needed
+                StartTime = Input.StartTime,
+                EndTime = Input.EndTime,
+                IsReserved = false
             };
 
-            DbContext.Termins.Add(newTermin);
-            await DbContext.SaveChangesAsync();
+            await TerminsRepo.AddTerminAsync(newTermin);
 
             Snackbar.Add("Termin dodany!", Severity.Success);
 
-            // Refresh list
             await LoadTermins();
 
             // Optionally reset input
@@ -131,9 +134,18 @@
         }
     }
 
-    private async Task DeleteTermin(int terminId)
+    private async Task DeleteTermin(int Id)
     {
-
+        try
+        {
+            await TerminsRepo.DeleteTerminAsync(Id);
+            Snackbar.Add("Termin usunięty.", Severity.Success);
+            await LoadTermins();
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add("Błąd usuwania terminu: " + ex.Message, Severity.Error);
+        }
     }
 
     private sealed class InputModel

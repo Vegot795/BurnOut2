@@ -2,26 +2,17 @@
 
 namespace Core.Models
 {
-    public class Termins
+    public class TerminsModel
     {
         public int Id { get; set; }
         public string Title { get; set; } = string.Empty;
-        public TimeOnly StartTime { get; set; } // Only hour and minute
-        public TimeOnly EndTime { get; set; }   // Only hour and minute
+        public DateOnly? Date { get; set; }
+        public TimeOnly StartTime { get; set; }
+        public TimeOnly EndTime { get; set; }
         public bool IsReserved { get; set; }
         public string? ReservedByUserId { get; set; }
 
-        public Termins() { }
-
-        public Termins(int id, string title, TimeOnly startTime, TimeOnly endTime)
-        {
-            Id = id;
-            Title = title;
-            StartTime = startTime;
-            EndTime = endTime;
-            IsReserved = false;
-            ReservedByUserId = null;
-        }
+        public TerminsModel() { }
 
         public void Reserve(string userId)
         {

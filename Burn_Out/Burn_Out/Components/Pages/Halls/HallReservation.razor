@@ -47,6 +47,14 @@ else
                         format="yyyy-MM-dd"/> 
 
             </MudItem>
+            <MudItem class="mb-3">
+                <MudText>End (date & time):</MudText>
+                <input type="datetime-local" class="form-control"
+                        @bind="reservationModel.EndTime"
+                        step="900"
+                        format="yyyy-MM-dd"/> 
+
+            </MudItem>
 
         </MudItem>
         <MudItem>
@@ -62,7 +70,7 @@ else
                     <MudTd>@termin.EndTime</MudTd>
                     <MudTd>@(termin.IsReserved ? "Nie" : "Tak")</MudTd>
                     <MudTd>
-                        <MudButton Variant="Variant.Filled">Zarezerwuj</MudButton>
+                        <MudButton ButtonType="ButtonType.Submit" Variant="Variant.Filled">Zarezerwuj</MudButton>
                     </MudTd>
                 </RowTemplate>
             </MudTable>
@@ -85,7 +93,7 @@ else
     [CascadingParameter]
     private HttpContext HttpContext { get; set; } = default!;
 
-    List<Termins> Termins = new List<Termins>();
+    List<TerminsModel> Termins = new List<TerminsModel>();
 
     private ReservationModel reservationModel = new();
     private ApplicationUser? user;
@@ -144,7 +152,7 @@ else
         }
 
         // optionally enforce a maximum duration (example: 24 hours)
-        var maxHours = 24;
+        var maxHours = 3;
         if ((reservationModel.EndTime - reservationModel.StartTime).TotalHours > maxHours)
         {
             message = $"Reservation cannot be longer than {maxHours} hours.";
