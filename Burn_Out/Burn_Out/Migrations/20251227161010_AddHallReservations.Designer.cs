@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Burn_Out.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20251227150711_RemoveTermins")]
-    partial class RemoveTermins
+    [Migration("20251227161010_AddHallReservations")]
+    partial class AddHallReservations
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)

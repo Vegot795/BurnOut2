@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Core.Models
 {
@@ -14,7 +15,9 @@ namespace Core.Models
         public HallModel Hall { get; set; } = default!;
         public string UserId { get; set; } = default!;
         public ApplicationUser User { get; set; } = default!;
+        [Column(TypeName = "datetime2")]
         public DateTime StartTime { get; set; }
+        [Column(TypeName = "datetime2")]
         public DateTime EndTime { get; set; }
     }
 }

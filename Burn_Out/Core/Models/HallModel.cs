@@ -4,6 +4,7 @@ using System.Globalization;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Core.Models
 {
@@ -13,7 +14,9 @@ namespace Core.Models
         public string HallName { get; set; }
         public bool IsAvailable { get; set; }
         public int Capacity { get; set; }
+        [Column(TypeName = "datetime2")]
         public DateTime? ReservationBegin { get; set; }
+        [Column(TypeName = "datetime2")]
         public DateTime? ReservationEnd { get; set; }
         public int? ReservedBy { get; set; }
     }
