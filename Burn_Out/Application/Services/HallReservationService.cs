@@ -12,12 +12,10 @@ public class HallReservationService
 
     public async Task<bool> CanReserveHallAsync(int hallId, DateTime start, DateTime end)
     {
-        // Ensure hall exists and is marked available
         var hall = await _db.Halls.FindAsync(hallId);
         if (hall is null) return false;
         if (!hall.IsAvailable) return false;
 
-        // Check for overlapping reservations (any existing where start < newEnd && end > newStart)
         return !await _db.HallReservations
             .AnyAsync(r => r.HallId == hallId &&
                            r.StartTime < end &&
@@ -28,15 +26,12 @@ public class HallReservationService
     {
         if (end <= start) throw new ArgumentException("End must be after start.", nameof(end));
 
-        // Quick check: can reserve?
         if (!await CanReserveHallAsync(hallId, start, end))
             return false;
 
-        // Use a transaction to ensure reservation and hall update are atomic
         await using var transaction = await _db.Database.BeginTransactionAsync();
         try
         {
-            // Re-check within transaction to avoid race conditions
             var overlap = await _db.HallReservations
                 .AnyAsync(r => r.HallId == hallId && r.StartTime < end && r.EndTime > start);
             if (overlap)
@@ -62,7 +57,6 @@ public class HallReservationService
 
             await _db.HallReservations.AddAsync(reservation);
 
-            // update hall state to reflect reservation
             hall.ReservationBegin = start;
             hall.ReservationEnd = end;
             hall.IsAvailable = false;
@@ -79,5 +73,20 @@ public class HallReservationService
             await transaction.RollbackAsync();
             throw;
         }
+    }
+
+    public async Task CancelReservationAsync(int reservationId)
+    {
+        var reservation = await _db.HallReservations.FindAsync(reservationId);
+        if (reservation is null) throw new ArgumentException("Reservation not found.", nameof(reservationId));
+        var hall = await _db.Halls.FindAsync(reservation.HallId);
+        if (hall is null) throw new InvalidOperationException("Associated hall not found.");
+        _db.HallReservations.Remove(reservation);
+
+        hall.IsAvailable = true;
+        hall.ReservationBegin = null;
+        hall.ReservationEnd = null;
+        _db.Halls.Update(hall);
+        await _db.SaveChangesAsync();
     }
 }
