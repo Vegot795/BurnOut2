@@ -22,14 +22,14 @@
             <HeaderContent>
                 <MudTh>Nazwa</MudTh>
                 <MudTh>Pojemność</MudTh>
-                <MudTh>Możliwość rezerwacnji</MudTh>
+                <MudTh>Możliwość rezerwacji</MudTh>
                 <MudTh>Akcje</MudTh>
             </HeaderContent>
             <RowTemplate>
                 <MudTd DataLabel="Nazwa">@context.HallName</MudTd>
                 <MudTd DataLabel="Pojemność">@context.Capacity</MudTd>
                 <MudTd DataLabel="Dostępność">@context.IsAvailable</MudTd>
-                <MudTd DataLabel="Dostępność">
+                <MudTd DataLabel="">
                     <MudButton Variant="Variant.Filled" Disabled="!context.IsAvailable" OnClick="@(() => ReserveHall(context.Id))">Zarezerwuj</MudButton>
                 </MudTd>
             </RowTemplate>

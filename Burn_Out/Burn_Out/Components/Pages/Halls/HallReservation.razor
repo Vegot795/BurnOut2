@@ -36,27 +36,46 @@ else
                 <MudItem class="form-control-plaintext">ID: @reservationModel.HallId</MudItem>
             }
         </MudItem>
+        <MudItem>
+            <MudItem class="mb-3">
+                <MudText>Start (date & time):</MudText>
+                <input type="datetime-local" class="form-control"
+                        @bind="reservationModel.StartTime"
+                        step="900"
+                        format="yyyy-MM-dd"/> 
 
-        <MudItem class="mb-3">
-            <MudText>Start (date & time):</MudText>
-            <input type="datetime-local" class="form-control"
-                   @bind="reservationModel.StartTime"
-                   step="900" /> @* step=900 => 15 minute increments; adjust as needed *@
+            </MudItem>
+            <MudItem class="mb-3">
+                <MudText>End (date & time):</MudText>
+                <input type="datetime-local" class="form-control"
+                        @bind="reservationModel.EndTime"
+                        step="900"
+                        format="yyyy-MM-dd"/> 
+
+            </MudItem>
+
         </MudItem>
-
-        <MudItem class="mb-3">
-            <MudText>End (date & time):</MudText>
-            <input type="datetime-local" class="form-control"
-                   @bind="reservationModel.EndTime"
-                   step="900" />
+        <MudItem>
+            <MudTable Items="@Termins">
+                <HeaderContent>
+                    <MudTh>Początek</MudTh>
+                    <MudTh>Koniec</MudTh>
+                    <MudTh>Dostępny</MudTh>
+                    <MudTh></MudTh>
+                </HeaderContent>
+                <RowTemplate Context="termin">
+                    <MudTd>@termin.StartTime</MudTd>
+                    <MudTd>@termin.EndTime</MudTd>
+                    <MudTd>@(termin.IsReserved ? "Nie" : "Tak")</MudTd>
+                    <MudTd>
+                        <MudButton ButtonType="ButtonType.Submit" Variant="Variant.Filled">Zarezerwuj</MudButton>
+                    </MudTd>
+                </RowTemplate>
+            </MudTable>
         </MudItem>
+        
+        <MudButton OnClick="@(() => GoToTerminsEdit())">Edytuj Terminy</MudButton>
 
-        <MudItem class="mb-3">
-            <MudText>User:</MudText>
-            <div class="form-control-plaintext">@displayUserText</div>
-        </MudItem>
-
-        <button type="submit" class="btn btn-primary" disabled="@submitDisabled">Reserve</button>
     </EditForm>
 
     @if (!string.IsNullOrEmpty(message))
@@ -72,12 +91,15 @@ else
     [CascadingParameter]
     private HttpContext HttpContext { get; set; } = default!;
 
+    List<TerminsModel> Termins = new List<TerminsModel>();
+
     private ReservationModel reservationModel = new();
-    private string? message;
-    private bool _loading = true;
     private ApplicationUser? user;
     private HallModel? currentHall;
+
     private string displayUserText = string.Empty;
+    private string? message;
+    private bool _loading = true;
     private bool submitDisabled = false;
 
     protected override async Task OnInitializedAsync()
@@ -125,7 +147,8 @@ else
             return;
         }
 
-        var maxHours = 24;
+        // optionally enforce a maximum duration (example: 24 hours)
+        var maxHours = 3;
         if ((reservationModel.EndTime - reservationModel.StartTime).TotalHours > maxHours)
         {
             message = $"Reservation cannot be longer than {maxHours} hours.";
@@ -179,4 +202,5 @@ else
         public DateTime StartTime { get; set; } = DateTime.Now;
         public DateTime EndTime { get; set; } = DateTime.Now.AddHours(1);
     }
+
 }
