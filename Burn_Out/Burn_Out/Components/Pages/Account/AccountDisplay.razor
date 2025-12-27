@@ -19,6 +19,7 @@
 @inject NavigationManager NavigationManager
 
 
+
 <PageTitle>Informacje konta</PageTitle>
 
 <MudContainer MaxWidth="MaxWidth.Large" Class="mt-4">
@@ -97,6 +98,38 @@
                     </MudCard>
                 </MudItem>
 
+                <MudItem xs="12" sm="6" md="4">
+                    <MudCard>
+                        <MudCardHeader>
+                            <MudText Typo="Typo.h6">Twoje rezerwacje</MudText>
+                        </MudCardHeader>
+                        <MudCardContent>
+                            <MudTable Items="@_myReservations">
+                                <HeaderContent>
+                                    <MudTh>Sala</MudTh>
+                                    <MudTh>Ropoczêcie</MudTh>
+                                    <MudTh>Zakoñczenie</MudTh>
+                                    <MudTh></MudTh>
+                                </HeaderContent>
+                                <RowTemplate>
+                                    <MudTd>@context.Hall.HallName</MudTd>
+                                    <MudTd>@context.StartTime.ToString("g")</MudTd>
+                                    <MudTd>@context.EndTime.ToString("g")</MudTd>
+                                    <MudTd>
+                                        <MudButton Variant="Variant.Text" Color="Color.Primary" Href="@($"/halls/reservation/{context.Id}")">
+                                            Szczegó³y
+                                        </MudButton>
+                                        <MudButton Variant="Variant.Text" Color="Color.Error" OnClick="@(async () => await CancelReservation(context.Id))">
+                                            Anuluj
+                                        </MudButton>
+                                    </MudTd>
+                                </RowTemplate> 
+                            </MudTable>
+                        </MudCardContent>
+
+                    </MudCard>
+                </MudItem>
+
                 <MudItem xs="12">
                         @if (latestMeasurement != null)
                         {
@@ -171,6 +204,9 @@
     private ApplicationUser? user;
     private bool isLoading = true;
     private bool canEdit = false;
+    private string userEmail;
+
+    private List<HallReservation> _myReservations = new List<HallReservation>();
 
     [Parameter]
     public string? UserId { get; set; }
@@ -181,6 +217,8 @@
     protected override async Task OnInitializedAsync()
     {
         isLoading = true;
+        await GetMyReservations();
+
         try
         {
             var currentUser = await UserAccessor.GetRequiredUserAsync();
@@ -194,7 +232,7 @@
             else
             {
                 user = currentUser;
-                canEdit = true; // user can always edit their own profile
+                canEdit = true; 
             }
 
             if (user != null)
@@ -212,6 +250,28 @@
         finally
         {
             isLoading = false;
+        }
+    }
+
+    private async Task GetMyReservations()
+    {
+        var currentUser = await UserAccessor.GetRequiredUserAsync();
+
+
+        _myReservations = await DbContext.HallReservations
+                                .Where(m => m.UserId == currentUser.Id)
+                                .OrderBy(m => m.StartTime)
+                                .ToListAsync();
+    }
+
+    private async Task CancelReservation(int reservationId)
+    {
+        var reservation = await DbContext.HallReservations.FindAsync(reservationId);
+        if (reservation != null)
+        {
+            DbContext.HallReservations.Remove(reservation);
+            await DbContext.SaveChangesAsync();
+            await GetMyReservations();
         }
     }
 }
