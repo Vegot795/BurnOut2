@@ -149,7 +149,7 @@
         {
             _myReservations = await DbContext.HallReservations
                 .Include(r => r.Hall)
-                .Where(r => r.UserId == userId && r.StartTime > DateTime.Now)
+                .Where(r => r.UserId == userId && r.EndTime > DateTime.Now)
                 .OrderBy(r => r.StartTime)
                 .ToListAsync();
         }
