@@ -25,22 +25,34 @@
 
 	<MudForm @ref="form">
 		<MudTextField @bind-value="Email" Label="Email" Required="true"/>
-		<MudTextField @bind-Value="Password" Label="Hasło" Required="true"/>
-		<MudTextField @bind-value="ConfirmPassword" Label="Potwierdź hasło" Required="true"/>
+		<MudTextField @bind-Value="Password" Label="Hasło" Required="true" Password="true"/>
+		<MudTextField @bind-value="ConfirmPassword" Label="Potwierdź hasło" Required="true" Password="true"/>
+		<MudTextField @bind-value="Name" Label="Imię" Required="true"/>
+		<MudTextField @bind-value="LastName" Label="Nazwisko" Required="true"/>
+		<MudItem>
+			<MudText>Data urodzenia: </MudText>
+			<input type="date" class="form-control"
+				   @bind="BirthDate" />
+		</MudItem>
+        <MudTextField @bind-Value="PhoneNumber" Label="Numer telefonu" Type="MudBlazor.InputType.Tel" />
 
 		<MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="RegisterUser" Disabled="@isSubmitting">Stwórz konto</MudButton>
-
-		<MudText Color="Color.Error" Typo=Typo.body2>@errorMessage</MudText>	
 	</MudForm>
 </MudPaper>
 
 @code {
 	private MudForm form = default!;
+
 	private string Email = string.Empty;
 	private string Password = string.Empty;
 	private string ConfirmPassword = string.Empty;
-	private bool isSubmitting = false;
+	private string Name = string.Empty;
+	private string LastName = string.Empty;
+	private DateTime BirthDate;
+	private int PhoneNumber;
 	private string errorMessage = string.Empty;
+
+	private bool isSubmitting = false;
 
 	private async Task RegisterUser()
 	{
@@ -69,7 +81,12 @@
 		{
 			UserName = Email,
 			Email = Email,
-			EmailConfirmed = true
+			EmailConfirmed = true,
+			FirstName = Name,
+			LastName = LastName,
+			DateOfBirth = BirthDate,
+			PhoneNumber = PhoneNumber
+
 		};
 
 		var result = await UserManager.CreateAsync(user, Password);

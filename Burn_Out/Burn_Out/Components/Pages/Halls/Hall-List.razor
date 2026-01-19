@@ -8,11 +8,14 @@
 @using MudBlazor
 @using Infrastructure.Data
 @using Core.Interfaces
+@using System.Security.Claims
+@using Microsoft.AspNetCore.Components.Authorization
 
 @inject IHallRepository HallRepository
 @inject ApplicationDbContext DbContext
 @inject ISnackbar SnackBar
 @inject NavigationManager NavigationManager
+@inject AuthenticationStateProvider AuthStateProvider
 
 <h3>Lista Sal</h3>
 
@@ -31,7 +34,10 @@
                 <MudTd DataLabel="Dostępność">@context.IsAvailable</MudTd>
                 <MudTd DataLabel="">
                     <MudButton Variant="Variant.Filled" Disabled="!context.IsAvailable" OnClick="@(() => ReserveHall(context.Id))">Zarezerwuj</MudButton>
-                    <MudButton Variant="Variant.Filled" OnClick="@(() => EditHall(context.Id))">Edytuj</MudButton>
+                    @if (!UserRoles.Contains("Client"))
+                    {
+                        <MudButton Variant="Variant.Filled" OnClick="@(() => EditHall(context.Id))">Edytuj</MudButton>
+                    }
                 </MudTd>
             </RowTemplate>
         </MudTable>
@@ -45,9 +51,44 @@
     private bool _loading = false;
     List<HallModel> hallList = new List<HallModel>();
 
+    // Holds the current user's roles
+    private List<string> UserRoles = new();
+
     protected override async Task OnInitializedAsync()
     {
+        await GetUserRolesAsync();
         await LoadHallAsync();
+    }
+
+    private async Task GetUserRolesAsync()
+    {
+        try
+        {
+            var authState = await AuthStateProvider.GetAuthenticationStateAsync();
+            var user = authState.User;
+
+            if (user?.Identity?.IsAuthenticated == true)
+            {
+                UserRoles = user.FindAll(ClaimTypes.Role)
+                                .Select(c => c.Value)
+                                .Where(r => !string.IsNullOrWhiteSpace(r))
+                                .Distinct()
+                                .ToList();
+            }
+            else
+            {
+                UserRoles = new List<string>();
+            }
+        }
+        catch (Exception ex)
+        {
+            SnackBar.Add($"Error retrieving user roles: {ex.Message}", Severity.Error);
+            UserRoles = new List<string>();
+        }
+        finally
+        {
+            StateHasChanged();
+        }
     }
 
     private async Task LoadHallAsync()

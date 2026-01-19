@@ -102,7 +102,7 @@ namespace Burn_Out.Components.Account
                         Email = email,
                         FirstName = user?.FirstName,
                         LastName = user?.LastName,
-                        PhoneNumber = int.TryParse(user?.PhoneNumber, out var phone) ? phone : (int?)null,
+                        PhoneNumber = int.TryParse(user?.PhoneNumber.ToString(), out var phone) ? phone : (int?)null,
                         DateOfBirth = user?.DateOfBirth,
                         CreatedAt = user.CreatedAt
                     });

@@ -22,13 +22,9 @@
 
 <MudPaper>
     <MudGrid>
-        <MudCard style="width: 90%">
+        <MudCard style="width: 90%" class="justify-content-center">
             <MudCardHeader Class="">
                 <MudText Typo="Typo.h5">Aktywne rezerwacje</MudText>
-                @if (!string.IsNullOrEmpty(_viewingUserName))
-                {
-                    <MudText Typo="Typo.caption" Color="Color.Secondary">Użytkownik: @_viewingUserName</MudText>
-                }
             </MudCardHeader>
             <MudCardContent>
                 <MudTable Items="@_myReservations" Loading="@isLoading">
@@ -60,13 +56,9 @@
             </MudCardContent>
         </MudCard>
 
-        <MudCard>
+        <MudCard style="width: 90%" class="align-content-center">
             <MudCardHeader>
                 <MudText Typo="Typo.h6">Historia rezerwacji</MudText>
-                @if (!string.IsNullOrEmpty(_viewingUserName))
-                {
-                    <MudText Typo="Typo.caption" Color="Color.Secondary">Użytkownik: @_viewingUserName</MudText>
-                }
             </MudCardHeader>
             <MudCardContent>
                 <MudTable Items="@_myHistory" Loading="@isLoading">
@@ -108,7 +100,6 @@
 
     protected override async Task OnParametersSetAsync()
     {
-        // Handle navigation between /reservations and /reservations/{UserId}
         await ResolveAndLoadAsync();
     }
 
@@ -122,10 +113,8 @@
             var roles = await UserManager.GetRolesAsync(currentUser);
             var canViewOthers = roles.Contains("Employee") || roles.Contains("Admin");
 
-            // If UserId is provided and the viewer can see others, use it; otherwise use current user
             _targetUserId = (!string.IsNullOrEmpty(UserId) && canViewOthers) ? UserId : currentUser.Id;
 
-            // Load display name
             var viewingUser = await UserManager.FindByIdAsync(_targetUserId);
             _viewingUserName = viewingUser?.UserName ?? _targetUserId;
 

@@ -3,10 +3,13 @@
 @rendermode InteractiveServer
 
 @using Infrastructure.Models
+@using Infrastructure.Repositories
+@using Core.Interfaces
 @using Microsoft.AspNetCore.Components.Authorization
 @using Microsoft.AspNetCore.Identity
 @inject AuthenticationStateProvider AuthenticationStateProvider
 @inject UserManager<ApplicationUser> UserManager
+@inject IPresenceHistory PresenceHistory
 
 <PageTitle>Home</PageTitle>
 
@@ -18,6 +21,10 @@ Welcome to your new app.
     <Authorized>
         <p>Hello, @userName!</p>
         <p>Role: @userRole</p>
+        <MudItem>
+            <MudText>Potwierdź wizytę na siłowni</MudText>
+            <MudButton Variant="Variant.Filled" OnClick="@(() => ConfirmPresence())">Potwierdź</MudButton>
+        </MudItem>
     </Authorized>
     <NotAuthorized>
         <p>You are not logged in.</p>
@@ -30,27 +37,37 @@ Welcome to your new app.
 
     protected override async Task OnInitializedAsync()
     {
-    var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
-    var user = authState.User;
+        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        var user = authState.User;
 
-    userName = user.Identity?.IsAuthenticated == true ? user.Identity.Name : null;
+        userName = user.Identity?.IsAuthenticated == true ? user.Identity.Name : null;
 
-    if (user.Identity?.IsAuthenticated == true)
-    {
-        var appUser = await UserManager.GetUserAsync(user);
-        if (appUser != null)
+        if (user.Identity?.IsAuthenticated == true)
         {
-            var roles = await UserManager.GetRolesAsync(appUser);
-            userRole = roles.FirstOrDefault() ?? "No roles";
+            var appUser = await UserManager.GetUserAsync(user);
+            if (appUser != null)
+            {
+                var roles = await UserManager.GetRolesAsync(appUser);
+                userRole = roles.FirstOrDefault() ?? "No roles";
+            }
+            else
+            {
+                userRole = "Unknown";
+            }
         }
         else
         {
-            userRole = "Unknown";
+            userRole = null;
         }
     }
-    else
+
+    private async Task ConfirmPresence()
     {
-        userRole = null;
-    }
+        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        var user = authState.User;
+        var UserId = await UserManager.GetUserIdAsync(await UserManager.GetUserAsync(user));
+
+
+        await PresenceHistory.AddPresenceAsync(UserId);
     }
 }
