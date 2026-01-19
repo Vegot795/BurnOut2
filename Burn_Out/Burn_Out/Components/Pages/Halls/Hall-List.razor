@@ -31,6 +31,7 @@
                 <MudTd DataLabel="Dostępność">@context.IsAvailable</MudTd>
                 <MudTd DataLabel="">
                     <MudButton Variant="Variant.Filled" Disabled="!context.IsAvailable" OnClick="@(() => ReserveHall(context.Id))">Zarezerwuj</MudButton>
+                    <MudButton Variant="Variant.Filled" OnClick="@(() => EditHall(context.Id))">Edytuj</MudButton>
                 </MudTd>
             </RowTemplate>
         </MudTable>
@@ -73,5 +74,10 @@
     {
         // navigate to reservation page with hall id in route
         NavigationManager.NavigateTo($"/hall-reservation/{hallId}");
+    }
+
+    private void EditHall(int hallId)
+    {
+        NavigationManager.NavigateTo($"/hall-edit/{hallId}");
     }
 }

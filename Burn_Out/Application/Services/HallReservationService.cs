@@ -52,7 +52,8 @@ public class HallReservationService
                 HallId = hallId,
                 UserId = userId,
                 StartTime = start,
-                EndTime = end
+                EndTime = end,
+                WhenReserved = DateTime.Now
             };
 
             await _db.HallReservations.AddAsync(reservation);
@@ -81,6 +82,19 @@ public class HallReservationService
         if (reservation is null) throw new ArgumentException("Reservation not found.", nameof(reservationId));
         var hall = await _db.Halls.FindAsync(reservation.HallId);
         if (hall is null) throw new InvalidOperationException("Associated hall not found.");
+
+        // Add to history before removing
+        var history = new ReservationHistoryModel
+        {
+            HallId = reservation.HallId,
+            UserId = reservation.UserId,
+            StartTime = reservation.StartTime,
+            EndTime = reservation.EndTime,
+            WhenReserved = reservation.WhenReserved,
+            Result = "Cancelled"
+        };
+        await _db.ReservationHistories.AddAsync(history);
+
         _db.HallReservations.Remove(reservation);
 
         hall.IsAvailable = true;

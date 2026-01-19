@@ -1,14 +1,14 @@
 ﻿using Infrastructure.Models;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Core.Models
 {
-    public class HallReservation
+    public class ReservationHistoryModel : HallReservation
     {
         public int Id { get; set; }
         public int HallId { get; set; }
@@ -20,5 +20,6 @@ namespace Core.Models
         [Column(TypeName = "datetime2")]
         public DateTime EndTime { get; set; }
         public DateTime WhenReserved { get; set; }
+        public string Result { get; set; } = string.Empty;
     }
 }

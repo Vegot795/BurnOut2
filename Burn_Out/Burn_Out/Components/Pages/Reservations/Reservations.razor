@@ -1,0 +1,195 @@
+﻿@page "/reservations"
+@page "/reservations/{UserId}"
+
+@using System.ComponentModel.DataAnnotations
+@using Burn_Out.Components.Account
+@using Infrastructure
+@using Infrastructure.Data
+@using Infrastructure.Models
+@using Microsoft.AspNetCore.Authorization
+@using Microsoft.AspNetCore.Identity
+@using Core.Models
+@using Microsoft.EntityFrameworkCore
+
+@attribute [Authorize]
+
+@inject ApplicationDbContext DbContext
+@inject UserManager<ApplicationUser> UserManager
+@inject IdentityUserAccessor UserAccessor
+@inject NavigationManager NavigationManager
+@inject Application.Services.HallReservationService HallReservationService
+@inject ISnackbar Snackbar
+
+<MudPaper>
+    <MudGrid>
+        <MudCard style="width: 90%">
+            <MudCardHeader Class="">
+                <MudText Typo="Typo.h5">Aktywne rezerwacje</MudText>
+                @if (!string.IsNullOrEmpty(_viewingUserName))
+                {
+                    <MudText Typo="Typo.caption" Color="Color.Secondary">Użytkownik: @_viewingUserName</MudText>
+                }
+            </MudCardHeader>
+            <MudCardContent>
+                <MudTable Items="@_myReservations" Loading="@isLoading">
+                    <HeaderContent>
+                        <MudTh>Sala</MudTh>
+                        <MudTh>Rozpoczęcie</MudTh>
+                        <MudTh>Zakończenie</MudTh>
+                        <MudTh>Data utworzenia</MudTh>
+                        <MudTh></MudTh>
+                    </HeaderContent>
+                    <RowTemplate>
+                        <MudTd>@(context.Hall?.HallName ?? $"Sala #{context.HallId}")</MudTd>
+                        <MudTd>@context.StartTime.ToString("g")</MudTd>
+                        <MudTd>@context.EndTime.ToString("g")</MudTd>
+                        <MudTd>@context.WhenReserved.ToString("g")</MudTd>
+                        <MudTd>
+                            <MudButton Variant="Variant.Text" Color="Color.Primary" Href="@($"/hall-reservation/{context.HallId}")">
+                                Szczegóły
+                            </MudButton>
+                            <MudButton Variant="Variant.Text" Color="Color.Error" OnClick="@(async () => await CancelReservation(context.Id))">
+                                Anuluj
+                            </MudButton>
+                        </MudTd>
+                    </RowTemplate>
+                    <NoRecordsContent>
+                        <MudText>Brak aktywnych rezerwacji.</MudText>
+                    </NoRecordsContent>
+                </MudTable>
+            </MudCardContent>
+        </MudCard>
+
+        <MudCard>
+            <MudCardHeader>
+                <MudText Typo="Typo.h6">Historia rezerwacji</MudText>
+                @if (!string.IsNullOrEmpty(_viewingUserName))
+                {
+                    <MudText Typo="Typo.caption" Color="Color.Secondary">Użytkownik: @_viewingUserName</MudText>
+                }
+            </MudCardHeader>
+            <MudCardContent>
+                <MudTable Items="@_myHistory" Loading="@isLoading">
+                    <HeaderContent>
+                        <MudTh>Sala</MudTh>
+                        <MudTh>Rozpoczęcie</MudTh>
+                        <MudTh>Zakończenie</MudTh>
+                        <MudTh>Data rezerwacji</MudTh>
+                    </HeaderContent>
+                    <RowTemplate>
+                        <MudTd>@(context.Hall?.HallName ?? $"Sala #{context.HallId}")</MudTd>
+                        <MudTd>@context.StartTime.ToString("g")</MudTd>
+                        <MudTd>@context.EndTime.ToString("g")</MudTd>
+                        <MudTd>@context.WhenReserved.ToString("g")</MudTd>
+                    </RowTemplate>
+                    <NoRecordsContent>
+                        <MudText>Brak wpisów w historii rezerwacji.</MudText>
+                    </NoRecordsContent>
+                </MudTable>
+            </MudCardContent>
+        </MudCard>
+    </MudGrid>
+</MudPaper>
+
+@code {
+    [Parameter]
+    public string? UserId { get; set; }
+
+    private List<HallReservation> _myReservations = new();
+    private List<ReservationHistoryModel> _myHistory = new();
+    private bool isLoading = true;
+    private string? _targetUserId;
+    private string? _viewingUserName;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await ResolveAndLoadAsync();
+    }
+
+    protected override async Task OnParametersSetAsync()
+    {
+        // Handle navigation between /reservations and /reservations/{UserId}
+        await ResolveAndLoadAsync();
+    }
+
+    private async Task ResolveAndLoadAsync()
+    {
+        try
+        {
+            isLoading = true;
+
+            var currentUser = await UserAccessor.GetRequiredUserAsync();
+            var roles = await UserManager.GetRolesAsync(currentUser);
+            var canViewOthers = roles.Contains("Employee") || roles.Contains("Admin");
+
+            // If UserId is provided and the viewer can see others, use it; otherwise use current user
+            _targetUserId = (!string.IsNullOrEmpty(UserId) && canViewOthers) ? UserId : currentUser.Id;
+
+            // Load display name
+            var viewingUser = await UserManager.FindByIdAsync(_targetUserId);
+            _viewingUserName = viewingUser?.UserName ?? _targetUserId;
+
+            await GetMyReservations(_targetUserId);
+            await GetReservationHistory(_targetUserId);
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"Błąd inicjalizacji: {ex.Message}", Severity.Error);
+        }
+        finally
+        {
+            isLoading = false;
+            StateHasChanged();
+        }
+    }
+
+    private async Task GetMyReservations(string userId)
+    {
+        try
+        {
+            _myReservations = await DbContext.HallReservations
+                .Include(r => r.Hall)
+                .Where(r => r.UserId == userId && r.StartTime > DateTime.Now)
+                .OrderBy(r => r.StartTime)
+                .ToListAsync();
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"Błąd podczas ładowania rezerwacji: {ex.Message}", Severity.Error);
+        }
+    }
+
+    private async Task GetReservationHistory(string userId)
+    {
+        try
+        {
+            _myHistory = await DbContext.ReservationHistories
+                                    .Include(h => h.Hall)
+                                    .Where(h => h.UserId == userId)
+                                    .OrderByDescending(h => h.WhenReserved)
+                                    .ToListAsync();
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"Błąd podczas ładowania historii rezerwacji: {ex.Message}", Severity.Error);
+        }
+    }
+
+    private async Task CancelReservation(int reservationId)
+    {
+        try
+        {
+            await HallReservationService.CancelReservationAsync(reservationId);
+            if (!string.IsNullOrEmpty(_targetUserId))
+            {
+                await GetMyReservations(_targetUserId);
+                await GetReservationHistory(_targetUserId);
+            }
+            Snackbar.Add("Rezerwacja została anulowana.", Severity.Success);
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"Nie udało się anulować rezerwacji: {ex.Message}", Severity.Error);
+        }
+    }
+}
