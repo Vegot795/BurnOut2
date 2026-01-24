@@ -23,5 +23,5 @@ public class ApplicationUser : IdentityUser
     public ICollection<Measurement> Measurements { get; set; } = new List<Measurement>();
     public DateTime? LastPresent { get; set; }
     public string Email { get; set; }
-    public int PhoneNumber { get; set; }
+    public int? PhoneNumber { get; set; }
 }
