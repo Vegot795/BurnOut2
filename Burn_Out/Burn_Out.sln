@@ -17,6 +17,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Application", "Application\
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Burn_Out.UnitTests", "Burn_Out.UnitTests\Burn_Out.UnitTests.csproj", "{0A0B09FD-B28D-4412-80C0-2E081F1CB602}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Burn_Out.AccepanceTest", "Burn_Out.AccepanceTest\Burn_Out.AccepanceTest.csproj", "{48C8E01E-3BC8-421B-890A-5C0D423040EF}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -47,6 +49,10 @@ Global
 		{0A0B09FD-B28D-4412-80C0-2E081F1CB602}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{0A0B09FD-B28D-4412-80C0-2E081F1CB602}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{0A0B09FD-B28D-4412-80C0-2E081F1CB602}.Release|Any CPU.Build.0 = Release|Any CPU
+		{48C8E01E-3BC8-421B-890A-5C0D423040EF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{48C8E01E-3BC8-421B-890A-5C0D423040EF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{48C8E01E-3BC8-421B-890A-5C0D423040EF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{48C8E01E-3BC8-421B-890A-5C0D423040EF}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -55,6 +61,7 @@ Global
 		{57B0CF5F-6817-4695-B3E9-8E9879E00979} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
 		{7F06ED7D-622D-47F2-9F07-271C8D59648F} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
 		{24BD0C6E-6DDE-4C95-B900-730BB245CC63} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
+		{48C8E01E-3BC8-421B-890A-5C0D423040EF} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {AF8DE184-7491-4284-ABDF-B4F3679AFB02}
