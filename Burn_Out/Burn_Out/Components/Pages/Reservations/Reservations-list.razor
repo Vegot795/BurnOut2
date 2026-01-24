@@ -1,0 +1,68 @@
+﻿@page "/reservations/list"
+
+@using MudBlazor
+@using Infrastructure.Models
+@using Infrastructure.Data
+@using Microsoft.EntityFrameworkCore
+@using System.Collections.Generic
+@using Core.Models
+
+@inject ApplicationDbContext DbContext
+
+<MudPaper>
+    <MudGrid>
+        <MudCard>
+            <MudCardHeader>
+                <MudText>Lista rezerwacji</MudText>
+            </MudCardHeader>
+            <MudCardContent>
+                <MudTable Items="@_reservationList" Loading="@_isLoading">
+                    <HeaderContent>
+                        <MudTh>Użytkownik</MudTh>
+                        <MudTh>Sala</MudTh>
+                        <MudTh>Rozpoczęcie</MudTh>
+                        <MudTh>Zakończenie</MudTh>
+                        <MudTh>Data rezerwacji</MudTh>
+                    </HeaderContent>
+                    <RowTemplate>
+                        <MudTd>@context.UserId</MudTd>
+                        <MudTd>@(context.Hall?.HallName ?? $"Sala #{context.HallId}")</MudTd>
+                        <MudTd>@context.StartTime.ToString("g")</MudTd>
+                        <MudTd>@context.EndTime.ToString("g")</MudTd>
+                        <MudTd>@context.WhenReserved.ToString("g")</MudTd>
+                    </RowTemplate>
+                </MudTable>
+            </MudCardContent>
+        </MudCard>
+    </MudGrid>
+</MudPaper>
+
+@code {
+    private List<HallReservation> _reservationList = new();
+    private bool _isLoading = true;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadReservationsAsync();
+    }
+
+    private async Task LoadReservationsAsync()
+    {
+        try
+        {
+            _isLoading = true;
+            _reservationList = await DbContext.HallReservations
+                .Include(r => r.Hall)
+                .OrderBy(r => r.StartTime)
+                .ToListAsync();
+        }
+        catch (Exception ex)
+        {
+            // Handle exceptions as needed
+        }
+        finally
+        {
+            _isLoading = false;
+        }
+    }
+}

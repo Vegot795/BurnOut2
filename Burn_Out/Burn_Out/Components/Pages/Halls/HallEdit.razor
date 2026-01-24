@@ -67,11 +67,7 @@
 
                 <MudItem xs="12">
                     <MudStack Row="true" Spacing="3">
-                        <MudButton ButtonType="ButtonType.Submit" 
-                        Variant="Variant.Filled" 
-                        Color="Color.Primary"
-                        StartIcon="@Icons.Material.Filled.Save"
-                        Disabled="isSaving">
+                        <MudButton ButtonType="ButtonType.Submit" Variant="Variant.Filled" Color="Color.Primary" StartIcon="@Icons.Material.Filled.Save" Disabled="isSaving">
                             @if (isSaving)
                             {
                                 <MudProgressCircular Size="Size.Small" Indeterminate="true" />
@@ -83,12 +79,13 @@
                             }
                         </MudButton>
 
-                        <MudButton Variant="Variant.Outlined" 
-                        Color="Color.Default"
-                        Href="/hall-list"
-                        Disabled="isSaving">
+                        <MudButton Variant="Variant.Outlined" Color="Color.Default" Href="/hall-list" Disabled="isSaving">
                             Anuluj
                         </MudButton>
+                        @if (IsEditMode)
+                        {
+                            <MudButton Variant="Variant.Outlined" Color="Color.Error" @onclick="@(() => DeleteHallAsync())">Usuń</MudButton>
+                        }
                     </MudStack>
                 </MudItem>
             </MudGrid>
@@ -213,6 +210,35 @@
         finally
         {
             isSaving = false;
+        }
+    }
+    private async Task DeleteHallAsync()
+    {
+        if (!IsEditMode || Id == null)
+        {
+            Snackbar.Add("Nie można usunąć sali w tym trybie.", Severity.Warning);
+            return;
+        }
+
+        try
+        {
+            existingHall = await DbContext.Halls.FindAsync(Id.Value);
+            if (existingHall == null)
+            {
+                Snackbar.Add("Sala nie została znaleziona.", Severity.Error);
+                return;
+            }
+
+            DbContext.Halls.Remove(existingHall);
+            await DbContext.SaveChangesAsync();
+
+            Snackbar.Add("Sala została usunięta pomyślnie!", Severity.Success);
+            NavigationManager.NavigateTo("/hall-list");
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"Błąd podczas usuwania sali: {ex.Message}", Severity.Error);
+            Debug.WriteLine($"Błąd podczas usuwania sali: {ex.Message}");
         }
     }
 

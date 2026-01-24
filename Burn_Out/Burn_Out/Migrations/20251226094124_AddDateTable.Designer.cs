@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Burn_Out.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20251215143122_AddHalls")]
-    partial class AddHalls
+    [Migration("20251226094124_AddDateTable")]
+    partial class AddDateTable
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -38,8 +38,7 @@ namespace Burn_Out.Migrations
 
                     b.Property<string>("HallName")
                         .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<bool>("IsAvailable")
                         .HasColumnType("bit");
@@ -56,6 +55,39 @@ namespace Burn_Out.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Halls");
+                });
+
+            modelBuilder.Entity("Core.Models.HallReservation", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateOnly>("Date")
+                        .HasColumnType("date");
+
+                    b.Property<TimeOnly>("EndTime")
+                        .HasColumnType("time");
+
+                    b.Property<int>("HallId")
+                        .HasColumnType("int");
+
+                    b.Property<TimeOnly>("StartTime")
+                        .HasColumnType("time");
+
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("HallId");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("HallReservations");
                 });
 
             modelBuilder.Entity("Infrastructure.Models.ApplicationUser", b =>
@@ -93,6 +125,9 @@ namespace Burn_Out.Migrations
                     b.Property<string>("LastName")
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
+
+                    b.Property<DateTime?>("LastPresent")
+                        .HasColumnType("datetime2");
 
                     b.Property<bool>("LockoutEnabled")
                         .HasColumnType("bit");
@@ -138,6 +173,52 @@ namespace Burn_Out.Migrations
                         .HasFilter("[NormalizedUserName] IS NOT NULL");
 
                     b.ToTable("AspNetUsers", (string)null);
+                });
+
+            modelBuilder.Entity("Infrastructure.Models.Measurement", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int?>("BackWide")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("BellyCircumference")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("BicepsCircumference")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("ChestCircumference")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("Date")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int?>("MaxBenchPress")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("MaxDeadLift")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("MaxSquat")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("ThighCircumference")
+                        .HasColumnType("int");
+
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("Measurements");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>
@@ -273,6 +354,36 @@ namespace Burn_Out.Migrations
                     b.ToTable("AspNetUserTokens", (string)null);
                 });
 
+            modelBuilder.Entity("Core.Models.HallReservation", b =>
+                {
+                    b.HasOne("Core.Models.HallModel", "Hall")
+                        .WithMany()
+                        .HasForeignKey("HallId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Infrastructure.Models.ApplicationUser", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Hall");
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("Infrastructure.Models.Measurement", b =>
+                {
+                    b.HasOne("Infrastructure.Models.ApplicationUser", "User")
+                        .WithMany("Measurements")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
                 {
                     b.HasOne("Microsoft.AspNetCore.Identity.IdentityRole", null)
@@ -322,6 +433,11 @@ namespace Burn_Out.Migrations
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+                });
+
+            modelBuilder.Entity("Infrastructure.Models.ApplicationUser", b =>
+                {
+                    b.Navigation("Measurements");
                 });
 #pragma warning restore 612, 618
         }

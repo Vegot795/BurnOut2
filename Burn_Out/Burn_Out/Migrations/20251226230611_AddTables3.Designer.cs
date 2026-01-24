@@ -4,6 +4,7 @@ using Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Burn_Out.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20251226230611_AddTables3")]
+    partial class AddTables3
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -46,8 +49,8 @@ namespace Burn_Out.Migrations
                     b.Property<DateTime?>("ReservationEnd")
                         .HasColumnType("datetime2");
 
-                    b.Property<string>("ReservedBy")
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<int?>("ReservedBy")
+                        .HasColumnType("int");
 
                     b.HasKey("Id");
 
@@ -62,11 +65,6 @@ namespace Burn_Out.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<string>("Discriminator")
-                        .IsRequired()
-                        .HasMaxLength(34)
-                        .HasColumnType("nvarchar(34)");
-
                     b.Property<DateTime>("EndTime")
                         .HasColumnType("datetime2");
 
@@ -80,9 +78,6 @@ namespace Burn_Out.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(450)");
 
-                    b.Property<DateTime>("WhenReserved")
-                        .HasColumnType("datetime2");
-
                     b.HasKey("Id");
 
                     b.HasIndex("HallId");
@@ -90,10 +85,38 @@ namespace Burn_Out.Migrations
                     b.HasIndex("UserId");
 
                     b.ToTable("HallReservations");
+                });
 
-                    b.HasDiscriminator().HasValue("HallReservation");
+            modelBuilder.Entity("Core.Models.Termins", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
 
-                    b.UseTphMappingStrategy();
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateOnly>("Date")
+                        .HasColumnType("date");
+
+                    b.Property<TimeOnly>("EndTime")
+                        .HasColumnType("time");
+
+                    b.Property<bool>("IsReserved")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("ReservedByUserId")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<TimeOnly>("StartTime")
+                        .HasColumnType("time");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Termins");
                 });
 
             modelBuilder.Entity("Infrastructure.Models.ApplicationUser", b =>
@@ -358,17 +381,6 @@ namespace Burn_Out.Migrations
                     b.HasKey("UserId", "LoginProvider", "Name");
 
                     b.ToTable("AspNetUserTokens", (string)null);
-                });
-
-            modelBuilder.Entity("Core.Models.ReservationHistoryModel", b =>
-                {
-                    b.HasBaseType("Core.Models.HallReservation");
-
-                    b.Property<string>("Result")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasDiscriminator().HasValue("ReservationHistoryModel");
                 });
 
             modelBuilder.Entity("Core.Models.HallReservation", b =>

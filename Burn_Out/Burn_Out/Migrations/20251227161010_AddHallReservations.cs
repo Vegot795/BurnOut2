@@ -5,7 +5,7 @@
 namespace Burn_Out.Migrations
 {
     /// <inheritdoc />
-    public partial class AddHalls : Migration
+    public partial class AddHallReservations : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)

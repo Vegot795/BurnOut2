@@ -4,6 +4,7 @@ using Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Burn_Out.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20251227233250_AddReservationHistory")]
+    partial class AddReservationHistory
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -46,8 +49,8 @@ namespace Burn_Out.Migrations
                     b.Property<DateTime?>("ReservationEnd")
                         .HasColumnType("datetime2");
 
-                    b.Property<string>("ReservedBy")
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<int?>("ReservedBy")
+                        .HasColumnType("int");
 
                     b.HasKey("Id");
 
@@ -363,10 +366,6 @@ namespace Burn_Out.Migrations
             modelBuilder.Entity("Core.Models.ReservationHistoryModel", b =>
                 {
                     b.HasBaseType("Core.Models.HallReservation");
-
-                    b.Property<string>("Result")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
 
                     b.HasDiscriminator().HasValue("ReservationHistoryModel");
                 });

@@ -1,4 +1,5 @@
 ﻿using Core.Models;
+using Infrastructure.Models;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 

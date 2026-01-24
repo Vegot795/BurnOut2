@@ -4,6 +4,7 @@ using Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Burn_Out.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20251215214208_InitialCreate")]
+    partial class InitialCreate
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -46,54 +49,12 @@ namespace Burn_Out.Migrations
                     b.Property<DateTime?>("ReservationEnd")
                         .HasColumnType("datetime2");
 
-                    b.Property<string>("ReservedBy")
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<int?>("ReservedBy")
+                        .HasColumnType("int");
 
                     b.HasKey("Id");
 
                     b.ToTable("Halls");
-                });
-
-            modelBuilder.Entity("Core.Models.HallReservation", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("Discriminator")
-                        .IsRequired()
-                        .HasMaxLength(34)
-                        .HasColumnType("nvarchar(34)");
-
-                    b.Property<DateTime>("EndTime")
-                        .HasColumnType("datetime2");
-
-                    b.Property<int>("HallId")
-                        .HasColumnType("int");
-
-                    b.Property<DateTime>("StartTime")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("UserId")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(450)");
-
-                    b.Property<DateTime>("WhenReserved")
-                        .HasColumnType("datetime2");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("HallId");
-
-                    b.HasIndex("UserId");
-
-                    b.ToTable("HallReservations");
-
-                    b.HasDiscriminator().HasValue("HallReservation");
-
-                    b.UseTphMappingStrategy();
                 });
 
             modelBuilder.Entity("Infrastructure.Models.ApplicationUser", b =>
@@ -131,9 +92,6 @@ namespace Burn_Out.Migrations
                     b.Property<string>("LastName")
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
-
-                    b.Property<DateTime?>("LastPresent")
-                        .HasColumnType("datetime2");
 
                     b.Property<bool>("LockoutEnabled")
                         .HasColumnType("bit");
@@ -358,36 +316,6 @@ namespace Burn_Out.Migrations
                     b.HasKey("UserId", "LoginProvider", "Name");
 
                     b.ToTable("AspNetUserTokens", (string)null);
-                });
-
-            modelBuilder.Entity("Core.Models.ReservationHistoryModel", b =>
-                {
-                    b.HasBaseType("Core.Models.HallReservation");
-
-                    b.Property<string>("Result")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasDiscriminator().HasValue("ReservationHistoryModel");
-                });
-
-            modelBuilder.Entity("Core.Models.HallReservation", b =>
-                {
-                    b.HasOne("Core.Models.HallModel", "Hall")
-                        .WithMany()
-                        .HasForeignKey("HallId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("Infrastructure.Models.ApplicationUser", "User")
-                        .WithMany()
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Hall");
-
-                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("Infrastructure.Models.Measurement", b =>

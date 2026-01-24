@@ -1,0 +1,153 @@
+﻿@page "/measure"    
+@using Burn_Out.Components.Account
+@using Infrastructure.Data
+@using Infrastructure.Models
+@using Microsoft.AspNetCore.Identity
+@using Core.Models
+@using Microsoft.EntityFrameworkCore
+
+@inject Microsoft.AspNetCore.Components.Authorization.AuthenticationStateProvider AuthenticationStateProvider
+@inject UserManager<ApplicationUser> UserManager
+@inject ApplicationDbContext DbContext
+
+<h3>MeasurePage</h3>
+
+<MudPaper>
+    <MudItem xs="12">
+        <MudCard>
+            <MudCardHeader>
+                <MudText Typo="Typo.h6">Dodaj pomiary</MudText>
+            </MudCardHeader>
+            <MudCardContent>
+                <MudGrid>
+                    <MudItem xs="12" sm="6" md="3">
+                        <MudNumericField T="int?" @bind-Value="NewDeadLift" Label="Martwy ciąg"></MudNumericField>
+                    </MudItem>
+                    <MudItem xs="12" sm="6" md="3">
+                        <MudNumericField T="int?" @bind-Value="NewBenchPress" Label="Wyciskanie na ławce"></MudNumericField>
+                    </MudItem>
+                    <MudItem xs="12" sm="6" md="3">
+                        <MudNumericField T="int?" @bind-Value="NewSquat" Label="Przysiady"></MudNumericField>
+                    </MudItem>
+                    <MudItem xs="12" sm="6" md="3">
+                        <MudNumericField T="int?" @bind-Value="NewBackWide" Label="Szerokość pleców"></MudNumericField>
+                    </MudItem>
+                    <MudItem xs="12" sm="6" md="3">
+                        <MudNumericField T="int?" @bind-Value="NewBicepsCirc" Label="Obwód bicepsu"></MudNumericField>
+                    </MudItem>
+                    <MudItem xs="12" sm="6" md="3">
+                        <MudNumericField T="int?" @bind-Value="NewThighCirc" Label="Obwód uda"></MudNumericField>
+                    </MudItem>
+                    <MudItem xs="12" sm="6" md="3">
+                        <MudNumericField T="int?" @bind-Value="NewChestCirc" Label="Obwód klatki piersiowej"></MudNumericField>
+                    </MudItem>
+                    <MudItem xs="12" sm="6" md="3">
+                        <MudNumericField T="int?" @bind-Value="NewBellyCirc" Label="Obwód brzucha"></MudNumericField>
+                    </MudItem>
+                    <MudItem xs="12">
+                        <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="AddMeasurements">Dodaj</MudButton>
+                    </MudItem>
+                </MudGrid>
+            </MudCardContent>
+            <MudCardHeader>
+                <CardHeaderContent>
+                    <MudText Typo="Typo.h6">Historia</MudText>
+                </CardHeaderContent>
+            </MudCardHeader>
+            <MudCardContent>
+                <MudTable Items="measurements">
+                    <HeaderContent>
+                        <MudTh>Data</MudTh>
+                        <MudTh>Martwy ciąg (KG)</MudTh>
+                        <MudTh>Wyciskanie na ławce (KG)</MudTh>
+                        <MudTh>Przysiady (KG)</MudTh>
+                        <MudTh>Szerokość Pleców (cm)</MudTh>
+                        <MudTh>Obwód bicepsu (cm)</MudTh>
+                        <MudTh>Obwó uda (cm)</MudTh>
+                        <MudTh>Obwód klatki piersiowej (cm)</MudTh>
+                        <MudTh>Obwód brzucha (cm)</MudTh>
+                    </HeaderContent>
+                    <RowTemplate>
+                        <MudTd DataLabel="Date">@context.Date.ToString("yyyy-MM-dd")</MudTd>
+                        <MudTd DataLabel="Deadlift">@context.MaxDeadLift</MudTd>
+                        <MudTd DataLabel="Bench Press">@context.MaxBenchPress</MudTd>
+                        <MudTd DataLabel="Squat">@context.MaxSquat</MudTd>
+                        <MudTd DataLabel="Back Wide">@context.BackWide</MudTd>
+                        <MudTd DataLabel="Biceps">@context.BicepsCircumference</MudTd>
+                        <MudTd DataLabel="Thigh">@context.ThighCircumference</MudTd>
+                        <MudTd DataLabel="Chest">@context.ChestCircumference</MudTd>
+                        <MudTd DataLabel="Belly">@context.BellyCircumference</MudTd>
+                    </RowTemplate>
+                </MudTable>
+            </MudCardContent>
+        </MudCard>
+    </MudItem>
+
+</MudPaper>
+@code {
+
+
+
+    private List<Measurement> measurements = new();
+    private int? NewDeadLift;
+    private int? NewSquat;
+    private int? NewBenchPress;
+    private int? NewBackWide;
+    private int? NewBicepsCirc;
+    private int? NewThighCirc;
+    private int? NewChestCirc;
+    private int? NewBellyCirc;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        var user = authState.User;
+
+        if (user != null)
+        {
+            var userId = user.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+            if (userId != null)
+            {
+                measurements = await DbContext.Measurements
+                    .Where(m => m.UserId == userId)
+                    .OrderByDescending(m => m.Date)
+                    .ToListAsync();
+            }   
+        }
+    }
+
+    private async Task AddMeasurements()
+    {
+        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        var user = authState.User;
+
+        if (user?.Identity?.IsAuthenticated != true)
+            return;
+
+        var userId = user.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+        if (userId == null)
+            return;
+
+        var measurement = new Measurement
+        {
+            UserId = userId,
+            Date = DateTime.Today,
+            MaxDeadLift = NewDeadLift,
+            MaxBenchPress = NewBenchPress,
+            MaxSquat = NewSquat,
+            BackWide = NewBackWide,
+            ThighCircumference = NewThighCirc,
+            ChestCircumference = NewChestCirc,
+            BellyCircumference = NewBellyCirc
+        };
+
+        DbContext.Measurements.Add(measurement);
+        await DbContext.SaveChangesAsync();
+
+        measurements.Insert(0, measurement);
+
+        NewDeadLift = NewBenchPress = NewSquat = NewBackWide = NewBicepsCirc =
+           NewThighCirc = NewChestCirc = NewBellyCirc = null;
+
+    }
+}
