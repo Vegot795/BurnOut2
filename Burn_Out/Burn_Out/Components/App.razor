@@ -29,10 +29,10 @@
 <MudThemeProvider />
 
 @code {
-    [CascadingParameter]
-    private HttpContext HttpContext { get; set; } = default!;
+    [Inject]
+    private IHttpContextAccessor HttpContextAccessor { get; set; } = default!;
 
-    private IComponentRenderMode? RenderModeForPage => HttpContext.Request.Path.StartsWithSegments("/user")
+    private IComponentRenderMode? RenderModeForPage => HttpContextAccessor.HttpContext is not null && HttpContextAccessor.HttpContext.Request.Path.StartsWithSegments("/user")
         ? InteractiveAuto
         : InteractiveServer;
 }

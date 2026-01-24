@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Http.Extensions;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.Primitives;
 
 namespace Microsoft.AspNetCore.Routing

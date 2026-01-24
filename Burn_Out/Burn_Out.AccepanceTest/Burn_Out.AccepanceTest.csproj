@@ -1,36 +1,37 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-	<PropertyGroup>
-		<TargetFramework>net8.0</TargetFramework>
-		<Nullable>enable</Nullable>
-		<ImplicitUsings>enable</ImplicitUsings>
-		<GenerateProgramFile>false</GenerateProgramFile>
-		<!-- brak Main() -->
-	</PropertyGroup>
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
 
-	<ItemGroup>
-		<!-- SpecFlow core -->
-		<PackageReference Include="SpecFlow" Version="3.9.74" />
-		<PackageReference Include="SpecFlow.MsTest" Version="3.9.74" />
+  <ItemGroup>
+    <Folder Include="Features\" />
+  </ItemGroup>
 
-		<!-- EF Core in-memory do testów backendu -->
-		<PackageReference Include="Microsoft.EntityFrameworkCore.InMemory" Version="8.0.22" />
-		<PackageReference Include="Microsoft.EntityFrameworkCore" Version="8.0.22" />
+  <ItemGroup>
+    <PackageReference Include="SpecFlow" Version="4.0.31-beta" />
+  </ItemGroup>
 
-		<!-- Newtonsoft.Json dla zgodności z innymi projektami -->
-		<PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
+  <ItemGroup>
+    <ProjectReference Include="..\Burn_Out.UnitTests\Burn_Out.UnitTests.csproj" />
+    <ProjectReference Include="..\Core\Core.csproj" />
+    <ProjectReference Include="..\Infrastructure\Infrastructure.csproj" />
+  </ItemGroup>
 
-		<!-- MSTest runner -->
-		<PackageReference Include="Microsoft.NET.Test.Sdk" Version="18.0.0" />
-		<PackageReference Include="MSTest.TestAdapter" Version="3.0.2" />
-		<PackageReference Include="MSTest.TestFramework" Version="3.0.2" />
-	</ItemGroup>
+  <ItemGroup>
+    <None Include="Burn_Out.AcceptanceTest.csproj" />
+  </ItemGroup>
 
-	<ItemGroup>
-		<!-- Odwołania do Twoich projektów w solution -->
-		<ProjectReference Include="..\Infrastructure\Infrastructure.csproj" />
-		<ProjectReference Include="..\Core\Core.csproj" />
-		<ProjectReference Include="..\Application\Application.csproj" />
-	</ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="18.0.0" />
+    <PackageReference Include="MSTest.TestAdapter" Version="4.0.1" />
+    <PackageReference Include="MSTest.TestFramework" Version="4.0.1" />
+  </ItemGroup>
 
 </Project>
