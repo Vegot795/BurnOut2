@@ -2,14 +2,21 @@
 
   <PropertyGroup>
 	<TargetFramework>net8.0</TargetFramework>
+	<GenerateAssemblyInfo>false</GenerateAssemblyInfo>
 	<Nullable>enable</Nullable>
 	<ImplicitUsings>enable</ImplicitUsings>
 	<UserSecretsId>aspnet-Burn_Out-3c39f14e-39bf-480f-8828-58f0654d1ff5</UserSecretsId>
   </PropertyGroup>
 
   <ItemGroup>
+	<PackageReference Include="bunit" Version="2.5.3" />
 	<PackageReference Include="Microsoft.Extensions.Identity.Core" Version="10.0.1" />
 	<PackageReference Include="MudBlazor" Version="6.17.0" />
+	<PackageReference Include="xunit" Version="2.9.3" />
+	<PackageReference Include="xunit.runner.visualstudio" Version="3.1.5">
+	  <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+	  <PrivateAssets>all</PrivateAssets>
+	</PackageReference>
 	<ProjectReference Include="..\Application\Application.csproj" />
 	<ProjectReference Include="..\Burn_Out.Client\Burn_Out.Client.csproj" />
 	<ProjectReference Include="..\Core\Core.csproj" />
