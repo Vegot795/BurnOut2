@@ -1,4 +1,5 @@
 ﻿// Infrastructure/Data/IdentitySeeder.cs
+using Core.Models;
 using Infrastructure.Data;
 using Infrastructure.Models;
 using Microsoft.AspNetCore.Identity;

@@ -73,11 +73,10 @@
                     <MudItem xs="12" sm="6">
                         <MudStack Spacing="1">
                             <MudText Typo="Typo.body2">Phone Number</MudText>
-                            <InputText @bind-Value="Input.PhoneNumber" 
-                                      class="form-control" 
-                                      type="tel"
-                                      placeholder="Enter your phone number" />
-                            <ValidationMessage For="@(() => Input.PhoneNumber)" />
+                            <MudTextField @bind-Value="Input.PhoneNumber" 
+                                          class="form-control" 
+                                          placeholder="Enter your phone number"
+                                          Type="MudBlazor.InputType.Tel" />
                         </MudStack>
                     </MudItem>
 
@@ -183,7 +182,7 @@
                 FirstName = user.FirstName,
                 LastName = user.LastName,
                 DateOfBirth = user.DateOfBirth,
-                PhoneNumber = user.PhoneNumber
+                PhoneNumber = user.PhoneNumber.ToString()
             };
 
             // set cancel link back to the appropriate profile page
@@ -218,7 +217,7 @@
             user.FirstName = Input.FirstName;
             user.LastName = Input.LastName;
             user.DateOfBirth = Input.DateOfBirth;
-            user.PhoneNumber = Input.PhoneNumber;
+            user.PhoneNumber = int.TryParse(Input.PhoneNumber, out var phoneNumber) ? phoneNumber : 0;
             user.LastModifiedAt = DateTime.UtcNow;
 
             var result = await UserManager.UpdateAsync(user);
@@ -261,6 +260,7 @@
 
         [Phone]
         [Display(Name = "Numer telefonu")]
+        // Make PhoneNumber a string to match Identity and the ApplicationUser change
         public string? PhoneNumber { get; set; }
     }
 }

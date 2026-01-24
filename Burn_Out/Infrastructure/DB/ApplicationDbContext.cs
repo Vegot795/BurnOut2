@@ -14,5 +14,6 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
     public DbSet<Measurement> Measurements { get; set; }
     public DbSet<HallReservation> HallReservations { get; set; }
     public DbSet<ReservationHistoryModel> ReservationHistories { get; set; }
+    public DbSet<PresenceHistoryModel> PresenceHistories { get; set; }
 
     }

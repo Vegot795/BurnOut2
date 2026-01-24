@@ -30,7 +30,7 @@ public class UserInfoController : ControllerBase
             Email = user.Email,     // ✅ required
             FirstName = user.FirstName,
             LastName = user.LastName,
-            PhoneNumber = string.IsNullOrEmpty(user.PhoneNumber) ? null : int.Parse(user.PhoneNumber),
+            PhoneNumber = user.PhoneNumber,
             DateOfBirth = user.DateOfBirth,
             CreatedAt = user.CreatedAt,
         };

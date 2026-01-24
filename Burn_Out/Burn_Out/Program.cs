@@ -61,6 +61,8 @@ builder.Services.AddScoped<AuthenticationStateProvider, PersistingRevalidatingAu
 builder.Services.AddScoped<IHallRepository, HallRepository>();
 builder.Services.AddScoped<Application.Services.HallReservationService>();
 
+builder.Services.AddScoped<IPresenceHistory, PresenceHistoryRepository>();
+
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddHttpClient();
 
