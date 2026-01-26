@@ -23,19 +23,22 @@
             </MudAlert>
         }
 
-        <MudTextField Label="Email"
+        <MudTextField Id="email-input"
+                      Label="Email"
                       @bind-Value="email"
                       InputType="InputType.Email"
                       Required="true"
                       Class="mb-3" />
 
-        <MudTextField Label="Password"
+        <MudTextField Id="password-input"
+                      Label="Password"
                       @bind-Value="password"
                       InputType="InputType.Password"
                       Required="true"
                       Class="mb-4" />
 
-        <MudButton Variant="Variant.Filled"
+        <MudButton Id="login-button"
+                   Variant="Variant.Filled"
                    Color="Color.Primary"
                    FullWidth="true"
                    OnClick="LoginLogic">
