@@ -28,6 +28,10 @@
       <Generator>SpecFlowSingleFileGenerator</Generator>
       <LastGenOutput>Login.feature.cs</LastGenOutput>
     </None>
+    <None Update="Features\HallReservation.feature">
+      <Generator>SpecFlowSingleFileGenerator</Generator>
+      <LastGenOutput>HallReservation.feature.cs</LastGenOutput>
+    </None>
   </ItemGroup>
 
 </Project>
