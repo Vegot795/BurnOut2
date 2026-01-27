@@ -19,6 +19,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Burn_Out.UnitTests", "Burn_
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Burn_Out.AcceptanceTests", "Burn_Out.AcceptanceTests\Burn_Out.AcceptanceTests.csproj", "{2158969A-C8E4-6700-F736-28F3114C70F4}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Burn_Out.FunctionalTests", "Burn_Out.FunctionalTests\Burn_Out.FunctionalTests.csproj", "{C7D1791B-C403-4AEB-9973-9027BCB65A14}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -53,6 +55,10 @@ Global
 		{2158969A-C8E4-6700-F736-28F3114C70F4}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{2158969A-C8E4-6700-F736-28F3114C70F4}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{2158969A-C8E4-6700-F736-28F3114C70F4}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C7D1791B-C403-4AEB-9973-9027BCB65A14}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C7D1791B-C403-4AEB-9973-9027BCB65A14}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C7D1791B-C403-4AEB-9973-9027BCB65A14}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C7D1791B-C403-4AEB-9973-9027BCB65A14}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

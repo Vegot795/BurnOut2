@@ -1,4 +1,4 @@
-﻿namespace Burn_Out.UnitTests
+﻿namespace Burn_Out.FunctionalTests
 {
     [TestClass]
     public sealed class Test1
