@@ -14,6 +14,7 @@ using System;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.AspNetCore.Components.Server;
 
+ 
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -180,3 +181,5 @@ app.MapPost("/api/auth/logout", async (
 app.MapAdditionalIdentityEndpoints();
 
 app.Run();
+
+public partial class Program { }

@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 18
-VisualStudioVersion = 18.2.11415.280 d18.0
+VisualStudioVersion = 18.2.11415.280
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Burn_Out", "Burn_Out\Burn_Out.csproj", "{B5FB2701-8A6D-425B-9B27-989021E1252E}"
 EndProject
@@ -16,6 +16,8 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Application", "Application\Application.csproj", "{24BD0C6E-6DDE-4C95-B900-730BB245CC63}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Burn_Out.UnitTests", "Burn_Out.UnitTests\Burn_Out.UnitTests.csproj", "{0A0B09FD-B28D-4412-80C0-2E081F1CB602}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Burn_Out.AcceptanceTests", "Burn_Out.AcceptanceTests\Burn_Out.AcceptanceTests.csproj", "{2158969A-C8E4-6700-F736-28F3114C70F4}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -47,6 +49,10 @@ Global
 		{0A0B09FD-B28D-4412-80C0-2E081F1CB602}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{0A0B09FD-B28D-4412-80C0-2E081F1CB602}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{0A0B09FD-B28D-4412-80C0-2E081F1CB602}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2158969A-C8E4-6700-F736-28F3114C70F4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2158969A-C8E4-6700-F736-28F3114C70F4}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2158969A-C8E4-6700-F736-28F3114C70F4}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2158969A-C8E4-6700-F736-28F3114C70F4}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
