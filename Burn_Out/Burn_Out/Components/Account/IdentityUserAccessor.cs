@@ -1,6 +1,6 @@
 using Infrastructure.Models;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Components.Authorization;
+using Microsoft.AspNetCore.Identity;
 
 namespace Burn_Out.Components.Account
 {

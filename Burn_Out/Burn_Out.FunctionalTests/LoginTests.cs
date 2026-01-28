@@ -1,11 +1,5 @@
-using System;
-using System.Threading;
-using System.IO;
-using System.Net.Http;
-using System.Diagnostics;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
-using OpenQA.Selenium;
 using OpenQA.Selenium.Chrome;
+using System.Diagnostics;
 
 namespace Burn_Out.FunctionalTests
 {

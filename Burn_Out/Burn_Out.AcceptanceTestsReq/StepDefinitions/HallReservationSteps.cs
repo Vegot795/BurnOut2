@@ -9,7 +9,6 @@ using System;
 using System.Globalization;
 using System.Linq;
 using System.Threading.Tasks;
-using TechTalk.SpecFlow;
 
 namespace Burn_Out.AcceptanceTests.Steps
 {

@@ -1,6 +1,4 @@
 ﻿// Infrastructure/Data/IdentitySeeder.cs
-using Core.Models;
-using Infrastructure.Data;
 using Infrastructure.Models;
 using Microsoft.AspNetCore.Identity;
 
@@ -10,8 +8,8 @@ namespace Infrastructure.Data
     {
         public static async Task SeedRolesAndAdminAsync(RoleManager<IdentityRole> roleManager,
                                                         UserManager<ApplicationUser> userManager)
-        {   
-            // 1. Seed roles    
+        {
+            // 1. Seed roles
             string[] roles = new[] { "Client", "Employee", "Admin" };
 
             foreach (var role in roles)

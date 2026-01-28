@@ -8,6 +8,5 @@ namespace Infrastructure.Data
         public string? LastName { get; set; }
         public DateTime? DateOfBirth { get; set; }
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
-
     }
 }

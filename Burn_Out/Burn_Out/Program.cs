@@ -4,17 +4,11 @@ using Core.Interfaces;
 using Infrastructure.Data;
 using Infrastructure.Models;
 using Infrastructure.Repositories;
-using Microsoft.AspNetCore.Authentication;
-using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Authorization;
+using Microsoft.AspNetCore.Components.Server;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using MudBlazor.Services;
-using System;
-using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
-using Microsoft.AspNetCore.Components.Server;
-
- 
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -204,4 +198,5 @@ app.MapAdditionalIdentityEndpoints();
 
 app.Run();
 
-public partial class Program { }
+public partial class Program
+{ }

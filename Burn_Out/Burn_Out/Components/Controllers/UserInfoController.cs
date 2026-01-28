@@ -1,5 +1,4 @@
 ﻿using Burn_Out.Client;
-using Infrastructure.Data;
 using Infrastructure.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;

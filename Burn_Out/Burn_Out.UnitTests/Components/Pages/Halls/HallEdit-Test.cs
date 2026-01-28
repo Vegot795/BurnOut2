@@ -1,7 +1,6 @@
 ﻿using Burn_Out.Tests.Helpers;
 using Core.Models;
 using Infrastructure.Data;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Burn_Out.Tests.EfCore;
 

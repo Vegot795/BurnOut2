@@ -17,6 +17,7 @@
   <ItemGroup>
     <ProjectReference Include="..\Application\Application.csproj" />
     <ProjectReference Include="..\Burn_Out.Client\Burn_Out.Client.csproj" />
+    <ProjectReference Include="..\Burn_Out.FunctionalTests\Burn_Out.FunctionalTests.csproj" />
     <ProjectReference Include="..\Burn_Out.UnitTests\Burn_Out.UnitTests.csproj" />
     <ProjectReference Include="..\Burn_Out\Burn_Out.csproj" />
     <ProjectReference Include="..\Core\Core.csproj" />

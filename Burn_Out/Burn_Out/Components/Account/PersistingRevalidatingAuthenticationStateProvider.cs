@@ -1,5 +1,3 @@
-using System.Diagnostics;
-using System.Security.Claims;
 using Burn_Out.Client;
 using Infrastructure.Models;
 using Microsoft.AspNetCore.Components;
@@ -8,6 +6,8 @@ using Microsoft.AspNetCore.Components.Server;
 using Microsoft.AspNetCore.Components.Web;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Options;
+using System.Diagnostics;
+using System.Security.Claims;
 
 namespace Burn_Out.Components.Account
 {

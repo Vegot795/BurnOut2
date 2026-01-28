@@ -1,13 +1,13 @@
+using Core.Models;
 using Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
-using Core.Models;
-using Infrastructure.Models;
 
 namespace Application.Services;
 
 public class HallReservationService
 {
     private readonly ApplicationDbContext _db;
+
     public HallReservationService(ApplicationDbContext db) => _db = db;
 
     public async Task<bool> CanReserveHallAsync(int hallId, DateTime start, DateTime end)
