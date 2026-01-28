@@ -18,9 +18,9 @@ namespace Burn_Out.AcceptanceTests.Steps
         private readonly TestWebApplicationFactory _factory;
         private bool _reservationResult;
 
-        public HallReservationSteps()
+        public HallReservationSteps(TestWebApplicationFactory factory)
         {
-            _factory = new TestWebApplicationFactory();
+            _factory = factory;
         }
 
         [Given(@"a hall exists with id (.*) named ""(.*)"" and capacity (.*)")]
@@ -29,7 +29,6 @@ namespace Burn_Out.AcceptanceTests.Steps
             using var scope = _factory.Services.CreateScope();
             var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
 
-            // Ensure clean slate if a hall with same id exists
             var existing = await db.Halls.FindAsync(id);
             if (existing is not null)
             {
