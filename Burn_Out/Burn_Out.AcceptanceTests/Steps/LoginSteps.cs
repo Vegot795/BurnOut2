@@ -22,12 +22,6 @@ namespace Burn_Out.AcceptanceTests.Steps
             _factory = new TestWebApplicationFactory();
         }
 
-        [Given("the application is running")]
-        public void GivenTheApplicationIsRunning()
-        {
-            // WebApplicationFactory starts the app when creating a client
-        }
-
         [Given("a user with email \"(.*)\" and password \"(.*)\" exists")]
         public async Task GivenAUserExists(string email, string password)
         {

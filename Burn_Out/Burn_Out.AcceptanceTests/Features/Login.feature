@@ -5,6 +5,6 @@ Feature: Login
 
   Scenario: Successful login with valid credentials
     Given the application is running
-    And a user with email "test@example.com" and password "Password123!" exists
-    When I attempt to sign in with email "test@example.com" and password "Password123!"
+    And a user with email "client@example.com" and password "Pass!23" exists
+    When I attempt to sign in with email "client@example.com" and password "Pass!23"
     Then the response should be a redirect to "/"

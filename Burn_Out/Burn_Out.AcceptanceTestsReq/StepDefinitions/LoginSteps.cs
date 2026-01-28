@@ -36,7 +36,12 @@ namespace Burn_Out.AcceptanceTests.Steps
 
             var user = new ApplicationUser { UserName = email, Email = email };
             var result = await userManager.CreateAsync(user, password);
-            result.Succeeded.Should().BeTrue();
+
+            // Helpful diagnostics
+            var errors = string.Join("; ", result.Errors.Select(e => $"{e.Code}: {e.Description}"));
+
+            result.Succeeded.Should().BeTrue(
+                $"user creation should succeed, but failed with: {errors}");
         }
 
         [When("I attempt to sign in with email \"(.*)\" and password \"(.*)\"")]

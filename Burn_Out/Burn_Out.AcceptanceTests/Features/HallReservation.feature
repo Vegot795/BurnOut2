@@ -5,7 +5,7 @@ Feature: Hall reservation
 
   Background:
     Given the application is running
-    And a user with email "user@example.com" and password "P@ssw0rd!" exists
+    And a user with email "client@example.com" and password "Pass!23" exists
 
   Scenario: Reserve an available hall succeeds
     Given a hall exists with id 1 named "Main Hall" and capacity 100

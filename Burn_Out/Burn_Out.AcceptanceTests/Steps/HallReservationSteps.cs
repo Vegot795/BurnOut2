@@ -53,7 +53,12 @@ namespace Burn_Out.AcceptanceTests.Steps
             await db.SaveChangesAsync();
         }
 
-        [Given(@"I reserve hall (.*) from ""(.*)"" to ""(.*)"" as ""(.*)""")]
+        [Given(@"A hall exist with id (.*) named ""(.*)"" and capacity ""(.*)"" ")]
+        public async Task GivenAHallExistWithIdNamedAndCapacity(int id, string name, int capacity)
+        {
+            await GivenAHallExists(id, name, capacity);
+        }
+
         [When(@"I reserve hall (.*) from ""(.*)"" to ""(.*)"" as ""(.*)""")]
         public async Task WhenIReserveHall(int hallId, string start, string end, string email)
         {
