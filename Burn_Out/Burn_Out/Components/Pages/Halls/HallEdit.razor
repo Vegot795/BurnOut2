@@ -44,8 +44,8 @@
                 <MudItem xs="12" md="6">
                     <MudStack Spacing="1">
                         <MudText Typo="Typo.h6">Nazwa Sali</MudText>
-                        <InputText @bind-value="Input.HallName" 
-                        class="form-control"
+                        <MudTextField id="HallName" @bind-value="Input.HallName" 
+                        class="HallName form-control"
                         placeholder="Wpisz nazwę sali"/>
                         <ValidationMessage For="@(() => Input.HallName)" />
                     </MudStack>
@@ -54,9 +54,9 @@
                 <MudItem xs="12" md="6">
                     <MudStack Spacing="1">
                         <MudText Typo="Typo.h6">Pojemność</MudText>
-                        <InputNumber @bind-value="Input.Capacity"
+                        <InputNumber id="Capacity" @bind-value="Input.Capacity"
                         class="form-control"
-                        placeholder="Wpisz pojemność sali" />
+                        placeholder="Wpisz pojemność sali"/>
                         <ValidationMessage For="@(() => Input.Capacity)" />
                     </MudStack>
                 </MudItem>
@@ -67,7 +67,7 @@
 
                 <MudItem xs="12">
                     <MudStack Row="true" Spacing="3">
-                        <MudButton ButtonType="ButtonType.Submit" Variant="Variant.Filled" Color="Color.Primary" StartIcon="@Icons.Material.Filled.Save" Disabled="isSaving">
+                        <MudButton id="subAddHallBut" ButtonType="ButtonType.Submit" Variant="Variant.Filled" Color="Color.Primary" StartIcon="@Icons.Material.Filled.Save" Disabled="isSaving">
                             @if (isSaving)
                             {
                                 <MudProgressCircular Size="Size.Small" Indeterminate="true" />

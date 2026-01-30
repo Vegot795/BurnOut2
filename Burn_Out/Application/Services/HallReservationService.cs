@@ -16,10 +16,11 @@ public class HallReservationService
         if (hall is null) return false;
         if (!hall.IsAvailable) return false;
 
-        return !await _db.HallReservations
-            .AnyAsync(r => r.HallId == hallId &&
-                           r.StartTime < end &&
-                           r.EndTime > start);
+        var reservations = await _db.HallReservations
+            .Where(r => r.HallId == hallId)
+            .ToListAsync();
+
+        return !reservations.Any(r => r.StartTime < end && r.EndTime > start);
     }
 
     public async Task<bool> ReserveHallAsync(int hallId, string userId, DateTime start, DateTime end)
@@ -32,8 +33,11 @@ public class HallReservationService
         await using var transaction = await _db.Database.BeginTransactionAsync();
         try
         {
-            var overlap = await _db.HallReservations
-                .AnyAsync(r => r.HallId == hallId && r.StartTime < end && r.EndTime > start);
+            var reservations = await _db.HallReservations
+                .Where(r => r.HallId == hallId)
+                .ToListAsync();
+
+            var overlap = reservations.Any(r => r.StartTime < end && r.EndTime > start);
             if (overlap)
             {
                 await transaction.RollbackAsync();
@@ -83,7 +87,6 @@ public class HallReservationService
         var hall = await _db.Halls.FindAsync(reservation.HallId);
         if (hall is null) throw new InvalidOperationException("Associated hall not found.");
 
-        // Add to history before removing
         var history = new ReservationHistoryModel
         {
             HallId = reservation.HallId,

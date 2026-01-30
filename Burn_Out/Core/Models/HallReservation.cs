@@ -11,10 +11,10 @@ namespace Core.Models
         public string UserId { get; set; } = default!;
         public ApplicationUser User { get; set; } = default!;
 
-        [Column(TypeName = "datetime2")]
+        [Column(TypeName = "datetime")]
         public DateTime StartTime { get; set; }
 
-        [Column(TypeName = "datetime2")]
+        [Column(TypeName = "datetime")]
         public DateTime EndTime { get; set; }
 
         public DateTime WhenReserved { get; set; }

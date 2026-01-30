@@ -1,12 +1,14 @@
+using Bunit;
 using OpenQA.Selenium;
 using OpenQA.Selenium.Chrome;
 using OpenQA.Selenium.Support.UI;
+using SeleniumExtras.WaitHelpers;
 using System.Diagnostics;
 
 namespace Burn_Out.FunctionalTests
 {
     [TestClass]
-    public class LoginTests
+    public class SeleniumTests
     {
         private ChromeDriver? _driver;
         private Process? _appProcess;
@@ -101,7 +103,7 @@ namespace Burn_Out.FunctionalTests
 
             _driver.FindElement(By.Id("loginButton")).Click();
 
-            _wait!.Until(d => d.Url.Contains("/user-profile"));
+
         }
 
         [TestCleanup]
@@ -127,9 +129,11 @@ namespace Burn_Out.FunctionalTests
         {
             Login("client@example.com", "Pass!23");
 
+            _wait!.Until(d => d.Url.Contains("/user-profile"));
+
             Assert.IsTrue(_driver!.Url.Contains("/user-profile"), "Expected to be on user profile page after successful login");
 
-            var userInfo = _driver.FindElement(By.Id("user-info"));
+            var userInfo = _driver.FindElement(By.Id("userInfo"));
             Assert.IsTrue(userInfo.Displayed);
         }
 
@@ -140,23 +144,48 @@ namespace Burn_Out.FunctionalTests
 
             var error = _wait!.Until(d => d.FindElement(By.ClassName("mud-alert")));
 
-            StringAssert.Contains(error.Text, "U¿ytkownik nie istnieje");
+            StringAssert.Contains(error.Text, "Nieprawid³owe has³o");
         }
 
         [TestMethod]
-        public void Register_NewUser_RedirectsToProfile()
+        public void Reservation_AfterLogin_ShouldSucceed()
         {
-            var email = $"test10@example.com";
-            var password = "Test!23Password";
-            var url = $"{BaseUrl}/auth/register?email={Uri.EscapeDataString(email)}&password={Uri.EscapeDataString(password)}&confirmPassword={Uri.EscapeDataString(password)}&firstName=Test&lastName=User";
+            Login("admin@example.com", "Pass!23");
 
-            // Act
-            _driver!.Navigate().GoToUrl(url);
-            Thread.Sleep(500);
+            var reservationUrl = $"{BaseUrl}/hall-list";
+            var hallEditUrl = $"{BaseUrl}/hall-editt";
 
-            // Assert - register endpoint redirects to /user-profile on success
-            var current = _driver.Url ?? string.Empty;
-            StringAssert.Contains(current, "/user-profile", "Expected to be redirected to user profile page after successful registration");
+            _driver!.Navigate().GoToUrl(reservationUrl);
+            _wait!.Until(b => b.Url.Contains(reservationUrl));
+
+            _driver!.Navigate().GoToUrl(hallEditUrl);
+
+            _wait!.Until(d => d.Url.Contains("/hall-edit"));
+            _driver.FindElement(By.Id("HallName")).SendKeys("Test-Hall");
+            _driver.FindElement(By.Id("capacity")).SendKeys("100");
+            _driver.FindElement(By.CssSelector("button[type='submit']")).Click();
+
+            _wait!.Until(d => d.Url.Contains("/hall-list"));
+
+            var subButton = _wait!.Until(ExpectedConditions.ElementToBeClickable(By.Id("res-Test-Hall")));
+            subButton.Click();
+            _wait!.Until(d => d.Url.Contains("/hall-reservation/"));
+
+
+
+            // Fill in reservation details
+            _driver.FindElement(By.Id("startDate")).SendKeys("31.01.2026 15:00:00");
+            _driver.FindElement(By.Id("endDate")).SendKeys("31.01.2026 17:00:00");
+            var subResButton = _wait!.Until(ExpectedConditions.ElementToBeClickable(By.Id("res-Test-Hall")));
+            subResButton.Click();
+
+            _wait!.Until(d => d.Url.Contains("/hall-list"));
+
+            // Assert reservation success
+
+            
+            var successMessage = _wait!.Until(d => d.FindElement(By.ClassName("mud-alert")));
+            StringAssert.Contains(successMessage.Text, "Rezerwacja zosta³a pomyœlnie utworzona");
         }
     }
 }

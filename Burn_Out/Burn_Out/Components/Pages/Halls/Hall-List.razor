@@ -33,17 +33,20 @@
                 <MudTd DataLabel="Pojemność">@context.Capacity</MudTd>
                 <MudTd DataLabel="Dostępność">@context.IsAvailable</MudTd>
                 <MudTd DataLabel="">
-                    <MudButton Variant="Variant.Filled" Disabled="!context.IsAvailable" OnClick="@(() => ReserveHall(context.Id))">Zarezerwuj</MudButton>
+                    <MudButton id="@($"res-{@context.HallName}")" Variant="Variant.Filled" Disabled="!context.IsAvailable" OnClick="@(() => ReserveHall(context.Id))">Zarezerwuj</MudButton>
                     @if (!UserRoles.Contains("Client"))
                     {
-                        <MudButton Variant="Variant.Filled" OnClick="@(() => EditHall(context.Id))">Edytuj</MudButton>
+                        <MudButton id="@($"edit-{@context.HallName}")" Variant="Variant.Filled" OnClick="@(() => EditHall(context.Id))">Edytuj</MudButton>
                     }
                 </MudTd>
             </RowTemplate>
         </MudTable>
-        <MudItem>
-            <MudButton Variant="Variant.Filled" Color="Color.Primary" Href="/hall-edit">Dodaj Salę</MudButton>
-        </MudItem>
+        @if (!UserRoles.Contains("Client"))
+        {
+            <MudItem>
+                <MudButton id="addHallBut" Variant="Variant.Filled" Color="Color.Primary" Href="/hall-edit">Dodaj Salę</MudButton>
+            </MudItem>
+        }
     </MudGrid>
 </MudPaper>
 
