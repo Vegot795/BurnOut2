@@ -19,7 +19,6 @@ namespace Burn_Out.Migrations
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
-
         }
     }
 }

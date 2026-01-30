@@ -1,7 +1,6 @@
-﻿
+﻿using Core.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.DependencyInjection;
-using Core.Models;
 
 public static class IdentitySeeder
 {

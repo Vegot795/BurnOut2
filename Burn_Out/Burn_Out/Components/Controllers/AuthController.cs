@@ -1,11 +1,6 @@
 ﻿using Infrastructure.Models;
-using Microsoft.AspNetCore.Authentication;
-using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using MudBlazor;
-
-
 
 [Microsoft.AspNetCore.Components.Route("api/[controller]")]
 [ApiController]
@@ -13,6 +8,7 @@ using MudBlazor;
 public class AuthController : ControllerBase
 {
     private readonly SignInManager<ApplicationUser> _signInManager;
+
     public AuthController(
         SignInManager<ApplicationUser> signInManager,
         UserManager<ApplicationUser> userManager,

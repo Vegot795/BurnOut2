@@ -40,7 +40,7 @@
                     <MudCard>
                         <MudCardHeader>
                             <CardHeaderContent>
-                                <MudText Typo="Typo.h6">Informacje cz³onka</MudText>
+                                <MudText id="userInfo" Typo="Typo.h6">Informacje cz³onka</MudText>
                             </CardHeaderContent>
                         </MudCardHeader>
                         <MudCardContent>
@@ -104,12 +104,12 @@
                         </MudCardHeader>
                         <MudCardContent>
                             <MudItem>
-                                <MudTable Items="@_presenceList" Loading="@isLoading">
+                                <MudTable id="ActivityTable" Items="@_presenceList" Loading="@isLoading">
                                     <HeaderContent>
                                         <MudTh>Ostatnia aktywnoœæ</MudTh>
                                     </HeaderContent>
                                     <RowTemplate>
-                                        <MudTd>@context.PresenceDate</MudTd>
+                                        <MudTd id="MudTd">@context.PresenceDate</MudTd>
                                     </RowTemplate>
                                     <NoRecordsContent>
                                         <MudText>Brak aktywnych rezerwacji.</MudText>

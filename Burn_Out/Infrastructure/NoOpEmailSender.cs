@@ -1,8 +1,6 @@
-﻿
-
-namespace Infrastructure.Services
+﻿namespace Infrastructure.Services
 {
-    public class NoOpEmailSender 
+    public class NoOpEmailSender
     {
         public Task SendEmailAsync(string email, string subject, string htmlMessage)
         {

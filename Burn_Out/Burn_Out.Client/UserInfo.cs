@@ -4,11 +4,12 @@ namespace Burn_Out.Client
     // to expose more information about the authenticated user to the client.
     public class UserInfo
     {
-        public required string UserId { get; set; }
-        public required string Email { get; set; }
+        public string UserId { get; set; }
+        public string Email { get; set; }
 
         // Additional profile properties (optional)
         public string? FirstName { get; set; }
+
         public string? LastName { get; set; }
         public int? PhoneNumber { get; set; }
         public DateTime? DateOfBirth { get; set; }
@@ -17,10 +18,5 @@ namespace Burn_Out.Client
         public DateTime? LastPresent { get; set; }
 
         //Progress klienta
-
-
-
-
-
     }
 }

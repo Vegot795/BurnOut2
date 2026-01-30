@@ -1,10 +1,9 @@
 ﻿using Burn_Out.Tests.Helpers;
 using Infrastructure.Data;
 using Infrastructure.Models;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
-
 
 namespace Burn_Out.Test.Components.Pages;
+
 [TestClass]
 public class Register
 {
@@ -14,8 +13,8 @@ public class Register
     public void Setup()
     {
         _db = DbContextFactoryTests.Create();
-
     }
+
     [TestMethod]
     public void CreateUser_ShouldBeSavedInDatabase()
     {

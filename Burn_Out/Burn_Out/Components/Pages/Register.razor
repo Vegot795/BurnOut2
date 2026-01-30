@@ -24,11 +24,11 @@
 	}
 
 	<MudForm @ref="form">
-		<MudTextField @bind-value="Email" Label="Email" Required="true"/>
-		<MudTextField @bind-Value="Password" Label="Hasło" Required="true" Password="true"/>
-		<MudTextField @bind-value="ConfirmPassword" Label="Potwierdź hasło" Required="true" Password="true"/>
-		<MudTextField @bind-value="Name" Label="Imię" Required="true"/>
-		<MudTextField @bind-value="LastName" Label="Nazwisko" Required="true"/>
+		<MudTextField Id="email" @bind-value="Email" Label="Email" Required="true"/>
+		<MudTextField Id="password" @bind-Value="Password" Label="Hasło" Required="true" Password="true"/>
+		<MudTextField Id="confirmPassword" @bind-value="ConfirmPassword" Label="Potwierdź hasło" Required="true" Password="true"/>
+		<MudTextField Id="name" @bind-value="Name" Label="Imię" Required="true"/>
+		<MudTextField Id="lastName" @bind-value="LastName" Label="Nazwisko" Required="true"/>
 		<MudItem>
 			<MudText>Data urodzenia: </MudText>
 			<input type="date" class="form-control"
@@ -36,21 +36,21 @@
 		</MudItem>
         <MudTextField @bind-Value="PhoneNumber" Label="Numer telefonu" Type="MudBlazor.InputType.Tel" />
 
-		<MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="RegisterUser" Disabled="@isSubmitting">Stwórz konto</MudButton>
+		<MudButton id="registerButton" Variant="Variant.Filled" Color="Color.Primary" OnClick="RegisterUser" Disabled="@isSubmitting">Stwórz konto</MudButton>
 	</MudForm>
 </MudPaper>
 
 @code {
 	private MudForm form = default!;
 
-	private string Email = string.Empty;
-	private string Password = string.Empty;
-	private string ConfirmPassword = string.Empty;
-	private string Name = string.Empty;
-	private string LastName = string.Empty;
-	private DateTime BirthDate;
-	private int PhoneNumber;
-	private string errorMessage = string.Empty;
+	protected string Email = string.Empty;
+	protected string Password = string.Empty;
+	protected string ConfirmPassword = string.Empty;
+	protected string Name = string.Empty;
+	protected string LastName = string.Empty;
+	protected DateTime BirthDate;
+	protected int PhoneNumber;
+	protected string errorMessage = string.Empty;
 
 	private bool isSubmitting = false;
 

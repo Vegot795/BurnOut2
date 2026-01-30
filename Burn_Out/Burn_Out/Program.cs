@@ -4,16 +4,11 @@ using Core.Interfaces;
 using Infrastructure.Data;
 using Infrastructure.Models;
 using Infrastructure.Repositories;
-using Microsoft.AspNetCore.Authentication;
-using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Authorization;
+using Microsoft.AspNetCore.Components.Server;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using MudBlazor.Services;
-using System;
-using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
-using Microsoft.AspNetCore.Components.Server;
-
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -26,13 +21,24 @@ builder.Services.AddRazorComponents()
 builder.Services.AddMudServices();
 
 // Configure EF Core
-var connectionString = builder.Configuration.GetConnectionString("DefaultConnection")
-    ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
+var useInMemory = builder.Configuration.GetValue<bool>("UseInMemoryDb")
+                 || string.Equals(Environment.GetEnvironmentVariable("E2E_TEST_USE_INMEMORY"), "1", StringComparison.OrdinalIgnoreCase);
 
-builder.Services.AddDbContext<ApplicationDbContext>(options =>
-    options.UseSqlServer(
-        builder.Configuration.GetConnectionString("DefaultConnection"),
-        b => b.MigrationsAssembly("Burn_Out")));
+if (useInMemory)
+{
+    builder.Services.AddDbContext<ApplicationDbContext>(options =>
+        options.UseInMemoryDatabase("E2E_Tests"));
+}
+else
+{
+    var connectionString = builder.Configuration.GetConnectionString("DefaultConnection")
+        ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
+
+    builder.Services.AddDbContext<ApplicationDbContext>(options =>
+        options.UseSqlServer(
+            connectionString,
+            b => b.MigrationsAssembly("Burn_Out")));
+}
 
 builder.Services
     .AddIdentity<ApplicationUser, IdentityRole>()
@@ -84,6 +90,17 @@ builder.Services.AddScoped(sp =>
 builder.Services.Configure<CircuitOptions>(options => { options.DetailedErrors = true; });
 
 var app = builder.Build();
+
+// Allow overriding URLs from environment for tests (e.g., https://localhost:5230)
+var forcedUrls = Environment.GetEnvironmentVariable("ASPNETCORE_URLS");
+if (!string.IsNullOrWhiteSpace(forcedUrls))
+{
+    app.Urls.Clear();
+    foreach (var u in forcedUrls.Split(';', StringSplitOptions.RemoveEmptyEntries))
+    {
+        app.Urls.Add(u);
+    }
+}
 
 app.MapGet("/api/auth/check", async (
     HttpContext context,
@@ -180,3 +197,6 @@ app.MapPost("/api/auth/logout", async (
 app.MapAdditionalIdentityEndpoints();
 
 app.Run();
+
+public partial class Program
+{ }

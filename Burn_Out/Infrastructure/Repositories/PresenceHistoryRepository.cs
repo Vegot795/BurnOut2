@@ -1,7 +1,6 @@
 ﻿using Core.Interfaces;
 using Core.Models;
 using Infrastructure.Data;
-using Microsoft.AspNetCore.Identity;
 
 namespace Infrastructure.Repositories
 {
@@ -13,6 +12,7 @@ namespace Infrastructure.Repositories
         {
             _contex = contex;
         }
+
         public async Task AddPresenceAsync(string UserId)
         {
             DateTime now = DateTime.Now;

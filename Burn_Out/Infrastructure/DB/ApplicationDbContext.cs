@@ -4,16 +4,17 @@ using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 
 namespace Infrastructure.Data;
+
 public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
 {
     public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
         : base(options)
     {
     }
+
     public DbSet<HallModel> Halls { get; set; }
     public DbSet<Measurement> Measurements { get; set; }
     public DbSet<HallReservation> HallReservations { get; set; }
     public DbSet<ReservationHistoryModel> ReservationHistories { get; set; }
     public DbSet<PresenceHistoryModel> PresenceHistories { get; set; }
-
-    }
+}

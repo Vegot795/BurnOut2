@@ -40,14 +40,14 @@ else
 
         <MudItem class="mb-3">
             <MudText>Start (date & time):</MudText>
-            <input type="datetime-local" class="form-control"
+            <input id="startDate" type="datetime-local" class="form-control"
                    @bind="reservationModel.StartTime"
                    step="900" /> @* step=900 => 15 minute increments; adjust as needed *@
         </MudItem>
 
         <MudItem class="mb-3">
             <MudText>End (date & time):</MudText>
-            <input type="datetime-local" class="form-control"
+            <input id="endDate" type="datetime-local" class="form-control"
                    @bind="reservationModel.EndTime"
                    step="900" />
         </MudItem>
@@ -57,7 +57,7 @@ else
             <div class="form-control-plaintext">@displayUserText</div>
         </MudItem>
 
-        <button type="submit" class="btn btn-primary" disabled="@submitDisabled">Reserve</button>
+        <button id="" type="submit" class="btn btn-primary" disabled="@submitDisabled">Zarezerwuj</button>
     </EditForm>
 
     @if (!string.IsNullOrEmpty(message))
