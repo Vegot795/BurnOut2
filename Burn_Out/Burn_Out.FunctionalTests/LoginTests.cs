@@ -1,4 +1,6 @@
+using OpenQA.Selenium;
 using OpenQA.Selenium.Chrome;
+using OpenQA.Selenium.Support.UI;
 using System.Diagnostics;
 
 namespace Burn_Out.FunctionalTests
@@ -8,40 +10,37 @@ namespace Burn_Out.FunctionalTests
     {
         private ChromeDriver? _driver;
         private Process? _appProcess;
-        private const string BaseUrl = "https://localhost:5230"; // keep aligned with app config
+        private const string BaseUrl = "http://localhost:5230";
+        private WebDriverWait? _wait;
 
         [TestInitialize]
         public void Setup()
         {
-            // Ensure the app is running for E2E navigation
             StartApplication(BaseUrl);
 
             var options = new ChromeOptions();
-            // Headless by default for CI; remove to see browser during development
             options.AddArgument("--headless=new");
             options.AddArgument("--no-sandbox");
             options.AddArgument("--disable-gpu");
             options.AddArgument("--disable-dev-shm-usage");
-            options.AddArgument("--ignore-certificate-errors"); // tolerate local dev cert
+            options.AddArgument("--ignore-certificate-errors");
 
-            // Remove any stale local ChromeDriver so Selenium Manager can fetch a matching one
             var baseDir = AppDomain.CurrentDomain.BaseDirectory;
             foreach (var path in Directory.GetFiles(baseDir, "chromedriver*.exe", SearchOption.TopDirectoryOnly))
             {
-                try { File.Delete(path); } catch { /* ignore */ }
+                try { File.Delete(path); } catch { }
             }
 
-            // Create driver (let Selenium Manager resolve a matching ChromeDriver)
             _driver = new ChromeDriver(options);
             _driver.Manage().Timeouts().ImplicitWait = TimeSpan.FromSeconds(5);
+
+            _wait = new WebDriverWait(_driver, TimeSpan.FromSeconds(10));
         }
 
         private void StartApplication(string baseUrl)
         {
-            // Only start if not already listening
             if (IsResponding(baseUrl, out _)) return;
 
-            // Resolve server project path from test bin directory
             var root = Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "..", "..", "..", ".."));
             var projectPath = Path.Combine(root, "Burn_Out", "Burn_Out.csproj");
 
@@ -58,7 +57,6 @@ namespace Burn_Out.FunctionalTests
                 CreateNoWindow = true
             };
 
-            // Environment for test-friendly hosting and DB
             psi.Environment["ASPNETCORE_ENVIRONMENT"] = "Development";
             psi.Environment["ASPNETCORE_URLS"] = baseUrl;
             psi.Environment["E2E_TEST_USE_INMEMORY"] = "1";
@@ -67,7 +65,6 @@ namespace Burn_Out.FunctionalTests
             if (_appProcess == null || _appProcess.HasExited)
                 Assert.Inconclusive("Failed to start application for functional tests.");
 
-            // Wait until the app responds
             var started = SpinWait.SpinUntil(() => IsResponding(baseUrl, out _), TimeSpan.FromSeconds(45));
             if (!started)
             {
@@ -95,6 +92,18 @@ namespace Burn_Out.FunctionalTests
             }
         }
 
+        private void Login(string email, string password)
+        {
+            _driver!.Navigate().GoToUrl($"{BaseUrl}/login");
+
+            _driver.FindElement(By.Id("email")).SendKeys(email);
+            _driver.FindElement(By.Id("password")).SendKeys(password);
+
+            _driver.FindElement(By.Id("loginButton")).Click();
+
+            _wait!.Until(d => d.Url.Contains("/user-profile"));
+        }
+
         [TestCleanup]
         public void TearDown()
         {
@@ -114,21 +123,40 @@ namespace Burn_Out.FunctionalTests
         }
 
         [TestMethod]
-        public void SignIn_WithInvalidCredentials_RedirectsToLoginError()
+        public void SignIn_WithValidCredentials_RedirectsToLoginError()
         {
-            var email = "nonexistent@example.com";
-            var password = "BadPassword";
-            var url = $"{BaseUrl}/auth/signin?email={Uri.EscapeDataString(email)}&password={Uri.EscapeDataString(password)}";
+            Login("client@example.com", "Pass!23");
+
+            Assert.IsTrue(_driver!.Url.Contains("/user-profile"), "Expected to be on user profile page after successful login");
+
+            var userInfo = _driver.FindElement(By.Id("user-info"));
+            Assert.IsTrue(userInfo.Displayed);
+        }
+
+        [TestMethod]
+        public void SignIn_WithInvalidCredentials_ShouldShowError()
+        {
+            Login("badclient@example.com", "Pass!23");
+
+            var error = _wait!.Until(d => d.FindElement(By.ClassName("mud-alert")));
+
+            StringAssert.Contains(error.Text, "U¿ytkownik nie istnieje");
+        }
+
+        [TestMethod]
+        public void Register_NewUser_RedirectsToProfile()
+        {
+            var email = $"test10@example.com";
+            var password = "Test!23Password";
+            var url = $"{BaseUrl}/auth/register?email={Uri.EscapeDataString(email)}&password={Uri.EscapeDataString(password)}&confirmPassword={Uri.EscapeDataString(password)}&firstName=Test&lastName=User";
 
             // Act
             _driver!.Navigate().GoToUrl(url);
-
-            // Small wait to allow redirect to complete
             Thread.Sleep(500);
 
-            // Assert - signin endpoint redirects to /login?error=1 on failure
+            // Assert - register endpoint redirects to /user-profile on success
             var current = _driver.Url ?? string.Empty;
-            StringAssert.Contains(current, "/login?error=1", "Expected to be redirected to login error page for invalid credentials");
+            StringAssert.Contains(current, "/user-profile", "Expected to be redirected to user profile page after successful registration");
         }
     }
 }

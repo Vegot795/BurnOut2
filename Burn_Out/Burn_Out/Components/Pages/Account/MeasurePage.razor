@@ -21,28 +21,28 @@
             <MudCardContent>
                 <MudGrid>
                     <MudItem xs="12" sm="6" md="3">
-                        <MudNumericField T="int?" @bind-Value="NewDeadLift" Label="Martwy ciąg"></MudNumericField>
+                        <MudNumericField id="NDF" T="int?" @bind-Value="NewDeadLift" Label="Martwy ciąg"></MudNumericField>
                     </MudItem>
                     <MudItem xs="12" sm="6" md="3">
-                        <MudNumericField T="int?" @bind-Value="NewBenchPress" Label="Wyciskanie na ławce"></MudNumericField>
+                        <MudNumericField id="NBP" T="int?" @bind-Value="NewBenchPress" Label="Wyciskanie na ławce"></MudNumericField>
                     </MudItem>
                     <MudItem xs="12" sm="6" md="3">
-                        <MudNumericField T="int?" @bind-Value="NewSquat" Label="Przysiady"></MudNumericField>
+                        <MudNumericField id="NS" T="int?" @bind-Value="NewSquat" Label="Przysiady"></MudNumericField>
                     </MudItem>
                     <MudItem xs="12" sm="6" md="3">
-                        <MudNumericField T="int?" @bind-Value="NewBackWide" Label="Szerokość pleców"></MudNumericField>
+                        <MudNumericField id="NBW" T="int?" @bind-Value="NewBackWide" Label="Szerokość pleców"></MudNumericField>
                     </MudItem>
                     <MudItem xs="12" sm="6" md="3">
-                        <MudNumericField T="int?" @bind-Value="NewBicepsCirc" Label="Obwód bicepsu"></MudNumericField>
+                        <MudNumericField id="NBC" T="int?" @bind-Value="NewBicepsCirc" Label="Obwód bicepsu"></MudNumericField>
                     </MudItem>
                     <MudItem xs="12" sm="6" md="3">
-                        <MudNumericField T="int?" @bind-Value="NewThighCirc" Label="Obwód uda"></MudNumericField>
+                        <MudNumericField id="NTC" T="int?" @bind-Value="NewThighCirc" Label="Obwód uda"></MudNumericField>
                     </MudItem>
                     <MudItem xs="12" sm="6" md="3">
-                        <MudNumericField T="int?" @bind-Value="NewChestCirc" Label="Obwód klatki piersiowej"></MudNumericField>
+                        <MudNumericField id="NCC" T="int?" @bind-Value="NewChestCirc" Label="Obwód klatki piersiowej"></MudNumericField>
                     </MudItem>
                     <MudItem xs="12" sm="6" md="3">
-                        <MudNumericField T="int?" @bind-Value="NewBellyCirc" Label="Obwód brzucha"></MudNumericField>
+                        <MudNumericField id="NBC" T="int?" @bind-Value="NewBellyCirc" Label="Obwód brzucha"></MudNumericField>
                     </MudItem>
                     <MudItem xs="12">
                         <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="AddMeasurements">Dodaj</MudButton>
@@ -55,7 +55,7 @@
                 </CardHeaderContent>
             </MudCardHeader>
             <MudCardContent>
-                <MudTable Items="measurements">
+                <MudTable id="UserMeasure" Items="measurements">
                     <HeaderContent>
                         <MudTh>Data</MudTh>
                         <MudTh>Martwy ciąg (KG)</MudTh>

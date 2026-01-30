@@ -81,7 +81,7 @@ namespace Burn_Out.AcceptanceTests.Features
     testRunner.Given("the application is running", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "Given ");
 #line hidden
 #line 8
-    testRunner.And("a user with email \"user@example.com\" and password \"P@ssw0rd!\" exists", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "And ");
+    testRunner.And("a user with email \"client@example.com\" and password \"Pass!23\" exists", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "And ");
 #line hidden
         }
         

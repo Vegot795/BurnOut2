@@ -95,10 +95,10 @@ namespace Burn_Out.AcceptanceTests.Features
     testRunner.Given("the application is running", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "Given ");
 #line hidden
 #line 8
-    testRunner.And("a user with email \"test@example.com\" and password \"Password123!\" exists", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "And ");
+    testRunner.And("a user with email \"client@example.com\" and password \"Pass!23\" exists", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "And ");
 #line hidden
 #line 9
-    testRunner.When("I attempt to sign in with email \"test@example.com\" and password \"Password123!\"", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "When ");
+    testRunner.When("I attempt to sign in with email \"client@example.com\" and password \"Pass!23\"", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "When ");
 #line hidden
 #line 10
     testRunner.Then("the response should be a redirect to \"/\"", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "Then ");
