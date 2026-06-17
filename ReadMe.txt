@@ -1,7 +1,7 @@
 BurnOut – Aplikacja do zarządzania siłownią
 
 Opis projektu
-BurnOut to webowa aplikacja do zarządzania siłownią, zbudowana w technologii **Blazor (.NET)**. System umożliwia zarządzanie salami treningowymi, rezerwacjami, członkami oraz historią obecności użytkowników.
+BurnOut to webowa aplikacja do zarządzania siłownią, zbudowana w technologii Blazor (.NET). System umożliwia zarządzanie salami treningowymi, rezerwacjami, członkami oraz historią obecności użytkowników.
 
 Funkcjonalności
 - Zarządzanie salami – przeglądanie, dodawanie i edycja sal treningowych dostępnych w obiekcie.
