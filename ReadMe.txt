@@ -1,43 +1,23 @@
-Instalacja projektu Burn Out
+BurnOut – Aplikacja do zarządzania siłownią
 
-1. Sklonuj repozytorium https://github.com/Vegot795/BurnOut2.git
-2. Po otworzeniu projektu w edytorze tekstowym, należy dokonać zmian w następujących plikach
-	global.json :
-"sdk": {
-  "version": (becna wersja SDK)
-}
+Opis projektu
+BurnOut to webowa aplikacja do zarządzania siłownią, zbudowana w technologii **Blazor (.NET)**. System umożliwia zarządzanie salami treningowymi, rezerwacjami, członkami oraz historią obecności użytkowników.
 
-	appsetings.json:"DefaultConnection": "Server=(link do połączenia z serwerem);Database=(nazwa bazy danych);Trusted_Connection=True;MultipleActiveResultSets=true;TrustServerCertificate=True"
+Funkcjonalności
+- Zarządzanie salami – przeglądanie, dodawanie i edycja sal treningowych dostępnych w obiekcie.
+- Rezerwacje – możliwość rezerwowania sal przez użytkowników oraz przeglądanie historii rezerwacji.
+- Zarządzanie członkami – przeglądanie listy zarejestrowanych użytkowników.
+- Potwierdzenie wizyty – zalogowani użytkownicy mogą potwierdzić swoją obecność na siłowni.
+- System ról – aplikacja obsługuje różne role użytkowników (np. administrator, członek).
+- Autentykacja – rejestracja i logowanie oparte na ASP.NET Core Identity.
 
-3. Należy zainstalowań następujące NuGet'y:
-	-Microsoft.AspNetCore.Diagnostics.EntityFrameworkCore
-	-Aspnet.Identity.EntityFramework.Core
-	-MudBlazor
-	-Microsoft.EntityFrameworkCore.Tools
-	-Microsoft.EntityFrameworkCore.SqlServe
-	-Microsoft.Data.SqlClient
-	-Microsoft.AspNetCore.Diagnostics.EntityFrameworkCore
-	-Playwright
-	-Microsoft.Extensions.Identity.Core
-	-Microsoft.EntityFrameworkCore.InMemory
-	-xunit
-	-xunit.runner.visualstudio
-	-Microsoft.NET.Test.Sdk
-	-Selenium
-	-MSTest
-3. Po zainstalowaniu NuGet'ów należy skompilować projekt
-4. Po zakończeniu kompilacji należy wpisać poniższe komendy w Developer PowerShell
+Technologie
+- Blazor Server (.NET)
+- ASP.NET Core Identity (autentykacja i autoryzacja)
+- Entity Framework Core (dostęp do bazy danych)
+- SQL Server (baza danych)
+- MudBlazor (komponenty UI)
 
-dotnet clean
-dotnet restore
-dotnet build
-
-5. Instalacja dobiegła końca
-
-Autorzy:
-Davies Ogunruku 52753
-Paweł Nizio 52749
-
-
-
-	
+Autorzy
+- Davies Ogunruku (52753)
+- Paweł Nizio (52749)
